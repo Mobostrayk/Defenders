@@ -1,0 +1,85 @@
+/* Общие стили */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+/* Верхняя панель */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+}
+
+.top-bar .left-links,
+.top-bar .right-links {
+    flex: 1; /* Равное пространство для левой и правой частей */
+    display: flex;
+}
+
+.top-bar .left-links {
+    justify-content: flex-start; /* Левые ссылки прижаты к началу */
+}
+
+.top-bar .right-links {
+    justify-content: flex-end; /* Правые ссылки прижаты к концу */
+}
+
+.top-bar .left-links a,
+.top-bar .right-links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 16px;
+}
+
+.top-bar .left-links a:hover,
+.top-bar .right-links a:hover {
+    text-decoration: underline;
+}
+
+.top-bar .center-title {
+    flex: 1; /* Центральная часть занимает оставшееся пространство */
+    text-align: center; /* Текст по центру */
+}
+
+.top-bar .center-title h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* Основной контент */
+.main-content {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.main-content h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.main-content p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.main-content .generate-button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.main-content .generate-button:hover {
+    background-color: #45a049;
+}
