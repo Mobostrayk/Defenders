@@ -5,8 +5,16 @@
 {% block content %}
     <!-- Основной контент -->
     <main class="main-content">
-        <h2>Создавайте и отслеживайте свои привычки</h2>
-        <p>генерируйте полезные привычки и следите за их выполнением. Отслеживание привычек поможет вам улучшить свою жизнь.</p>
-        <button class="generate-button">Сгенерировать</button>
+        <h1>Профиль пользователя: {{ profile.user.username }}</h1>
+        <div>
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="Аватарка" width="150">
+            {% else %}
+                <p>Аватарка не установлена.</p>
+            {% endif %}
+        </div>
+        <p>Email: {{ profile.user.email }}</p>
+        <p>Дата регистрации: {{ profile.user.date_joined }}</p>
+        <a href="{% url 'index' %}">На главную</a>
     </main>
 {% endblock %}
