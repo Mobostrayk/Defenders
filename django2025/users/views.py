@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from .forms import RegisterForm, LoginForm
 from .models import Profile
+from django.shortcuts import redirect
+from django.contrib.auth import logout as auth_logout
 
 def registration(request):
     if request.method == 'POST':
@@ -31,6 +33,10 @@ def user_login(request):
     else:
         form = LoginForm()
     return render(request, 'users/login.html', {'form': form})
+
+def logout(request):
+    auth_logout(request)
+    return redirect('index')
 
 @login_required
 def profile(request):
