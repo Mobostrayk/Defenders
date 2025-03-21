@@ -1,0 +1,21 @@
+{% extends 'users/layout.html' %}
+
+{% block title %}HHabits{% endblock %}
+
+{% block content %}
+    <!-- Основной контент -->
+    <main class="main-content">
+        <h1>Профиль пользователя: {{ profile.user.username }}</h1>
+        <div>
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="Аватарка" width="150">
+            {% else %}
+                <p>Аватарка не установлена.</p>
+            {% endif %}
+        </div>
+        <p>Email: {{ profile.user.email }}</p>
+        <p>Дата регистрации: {{ profile.user.date_joined }}</p>
+        <a href="{% url 'index' %}">На главную</a>
+        <a href="{%  url 'logout' %}">Выйти</a>  <!-- Кнопка выхода -->
+    </main>
+{% endblock %}

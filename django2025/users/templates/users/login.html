@@ -1,0 +1,16 @@
+{% extends 'users/layout.html' %}
+
+{% block title %}HHabits{% endblock %}
+
+{% block content %}
+  <main>
+     <h2>Авторизация</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Авторизироваться</button>
+    </form>
+      <p>Еще нет аккаунта? <a href="{% url 'registration' %}">Зарегистрируйтесь</a>.</p>
+  </main>
+
+{% endblock %}
