@@ -1,14 +1,49 @@
 {% extends 'main/layout.html' %}
-
+{% load static %}  <!-- Загрузка тега static -->
 {% block title %}HHabits{% endblock %}
 
 {% block content %}
-
-
     <!-- Основной контент -->
-    <main class="main-content">
-        <h2>Создавайте и отслеживайте свои привычки</h2>
-        <p>пенерируйте полезные привычки и следите за их выполнением. Отслеживание привычек поможет вам улучшить свою жизнь.</p>
-        <button class="generate-button">Сгенерировать</button>
+<div class="background"></div> <!-- Добавляем элемент для фона -->
+    <main class="main-content container text-center mt-5">
+        <h2 class="display-4 mb-4">Создавайте и отслеживайте свои привычки</h2>
+        <p class="lead mb-4">Генерируйте полезные привычки и следите за их выполнением. Отслеживание привычек поможет вам улучшить свою жизнь.</p>
+        <button class="btn btn-primary btn-lg generate-button">Сгенерировать</button>
     </main>
+
+    <style>
+        .background {
+            background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}"); /* Укажите путь к вашему изображению */
+            background-size: cover; /* Заставляет изображение занимать весь фон */
+            background-position: center; /* Центрирует изображение */
+            filter: blur(5px); /* Применяет размытие к фону */
+            position: fixed; /* Фиксирует фон */
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Устанавливает фон ниже остальных элементов */
+        }
+
+        .avatar-placeholder {
+            border: 2px dashed #ccc;
+            font-size: 14px;
+        }
+
+        .main-content {
+            position: relative; /* Устанавливает основной контент как относительный для правильного позиционирования */
+            z-index: 1; /* Устанавливает контент выше фона */
+        }
+        .main-content {
+            background-color: #f8f9fa; /* Светлый фон для основного контента */
+            padding: 40px; /* Отступы для основного контента */
+            border-radius: 8px; /* Закругленные углы */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Тень для основного контента */
+        }
+        .generate-button {
+            transition: background-color 0.3s, transform 0.3s; /* Плавный переход для кнопки */
+        }
+        .generate-button:hover {
+            background-color: #0056b3; /* Темнее при наведении */
+            transform: scale(1.05); /* Увеличение кнопки при наведении */
+        }
+    </style>
 {% endblock %}

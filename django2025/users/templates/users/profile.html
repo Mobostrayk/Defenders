@@ -1,21 +1,58 @@
-{% extends 'users/layout.html' %}
+{% extends 'users/base.html' %}
+
+{% load static %}  <!-- Загрузка тега static -->
 
 {% block title %}HHabits{% endblock %}
 
 {% block content %}
+    <!-- Новый элемент для фона -->
+    <div class="background"></div>
+
     <!-- Основной контент -->
-    <main class="main-content">
-        <h1>Профиль пользователя: {{ profile.user.username }}</h1>
-        <div>
+    <main class="main-content container mt-5">
+        <h1 class="text-center mb-4">Профиль пользователя: {{ profile.user.username }}</h1>
+
+        <div class="text-center mb-4">
             {% if profile.avatar %}
-                <img src="{{ profile.avatar.url }}" alt="Аватарка" width="150">
+                <img src="{{ profile.avatar.url }}" alt="Аватарка" class="img-fluid rounded-circle" width="150">
             {% else %}
-                <p>Аватарка не установлена.</p>
+                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; background-color: #f0f0f0;">
+                    <span class="text-muted">Аватарка не установлена.</span>
+                </div>
             {% endif %}
         </div>
-        <p>Email: {{ profile.user.email }}</p>
-        <p>Дата регистрации: {{ profile.user.date_joined }}</p>
-        <a href="{% url 'index' %}">На главную</a>
-        <a href="{%  url 'logout' %}">Выйти</a>  <!-- Кнопка выхода -->
+
+        <div class="profile-info text-center">
+            <p><strong>Email:</strong> {{ profile.user.email }}</p>
+            <p><strong>Дата регистрации:</strong> {{ profile.user.date_joined|date:"d.m.Y" }}</p>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'index' %}" class="btn btn-primary">На главную</a>
+            <a href="{% url 'logout' %}" class="btn btn-danger">Выйти</a>  <!-- Кнопка выхода -->
+        </div>
     </main>
-{% endblock %}
+
+    <style>
+        .background {
+            background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}"); /* Укажите путь к вашему изображению */
+            background-size: cover; /* Заставляет изображение занимать весь фон */
+            background-position: center; /* Центрирует изображение */
+            filter: blur(5px); /* Применяет размытие к фону */
+            position: fixed; /* Фиксирует фон */
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Устанавливает фон ниже остальных элементов */
+        }
+
+        .avatar-placeholder {
+            border: 2px dashed #ccc;
+            font-size: 14px;
+        }
+
+        .main-content {
+            position: relative; /* Устанавливает основной контент как относительный для правильного позиционирования */
+            z-index: 1; /* Устанавливает контент выше фона */
+        }
+    </style>
+{% endblock %}  <!-- Закрывающий тег для блока content -->

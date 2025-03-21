@@ -1,16 +1,58 @@
-{% extends 'users/layout.html' %}
+{% extends 'users/base.html' %}
 
-{% block title %}HHabits{% endblock %}
+{% load static %}
+{% load form_tags %}
+{% block title %}Авторизация{% endblock %}
 
 {% block content %}
-  <main>
-     <h2>Авторизация</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Авторизироваться</button>
-    </form>
-      <p>Еще нет аккаунта? <a href="{% url 'registration' %}">Зарегистрируйтесь</a>.</p>
-  </main>
+<div class="background"></div> <!-- Новый элемент для фона -->
+<main class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header text-center">
+                    <h4>Авторизация</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                            {{ form.username|add_class:"form-control form-control-lg" }}  <!-- Используем фильтр add_class -->
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                            {{ form.password|add_class:"form-control form-control-lg" }}  <!-- Используем фильтр add_class -->
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">Войти</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'password_reset' %}" class="btn btn-link">Восстановить пароль</a> <!-- Кнопка для восстановления пароля -->
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="mb-0">Нет аккаунта? <a href="{% url 'registration' %}">Зарегистрируйтесь</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 
+<style>
+    .background {
+        background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}"); /* Укажите путь к вашему изображению */
+        background-size: cover; /* Заставляет изображение занимать весь фон */
+        background-position: center; /* Центрирует изображение */
+        filter: blur(5px); /* Применяет размытие к фону */
+        position: fixed; /* Фиксирует фон */
+        width: 100%;
+        height: 100%;
+        z-index: -1; /* Устанавливает фон ниже остальных элементов */
+    }
+
+    .container {
+        position: relative; /* Устанавливает контейнер как относительный для правильного позиционирования */
+        z-index: 1; /* Устанавливает контейнер выше фона */
+    }
+</style>
 {% endblock %}
