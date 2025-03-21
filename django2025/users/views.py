@@ -1,10 +1,12 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from .forms import RegisterForm, LoginForm
 from .models import Profile
 from django.shortcuts import redirect
 from django.contrib.auth import logout as auth_logout
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
 
 def registration(request):
     if request.method == 'POST':
@@ -42,3 +44,7 @@ def logout(request):
 def profile(request):
     user_profile = get_object_or_404(Profile, user=request.user)
     return render(request, 'users/profile.html', {'profile': user_profile})
+
+
+
+

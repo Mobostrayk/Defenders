@@ -4,11 +4,25 @@
 
 {% block content %}
     <!-- Основной контент -->
-<div class="background"></div> <!-- Добавляем элемент для фона -->
+    <div class="background"></div> <!-- Добавляем элемент для фона -->
     <main class="main-content container text-center mt-5">
         <h2 class="display-4 mb-4">Создавайте и отслеживайте свои привычки</h2>
         <p class="lead mb-4">Генерируйте полезные привычки и следите за их выполнением. Отслеживание привычек поможет вам улучшить свою жизнь.</p>
-        <button class="btn btn-primary btn-lg generate-button">Сгенерировать</button>
+
+        <!-- Блок для генерации привычек -->
+        {% if random_habit %}
+            <div class="habit-card p-4 mb-4 bg-white rounded shadow-sm">
+                <h3 class="habit-name">{{ random_habit.name }}</h3>
+                {% if not has_habit %}
+                    <a href="{% url 'save_habit' random_habit.id %}" class="btn btn-success btn-lg mt-3">Сохранить привычку</a>
+                {% else %}
+                    <p class="text-muted mt-3">Вы уже сохранили эту привычку.</p>
+                {% endif %}
+            </div>
+            <a href="{% url 'index' %}" class="btn btn-primary btn-lg generate-button">Сгенерировать другую привычку</a>
+        {% else %}
+            <p class="text-muted">Привычки не найдены.</p>
+        {% endif %}
     </main>
 
     <style>
@@ -23,27 +37,46 @@
             z-index: -1; /* Устанавливает фон ниже остальных элементов */
         }
 
-        .avatar-placeholder {
-            border: 2px dashed #ccc;
-            font-size: 14px;
-        }
-
         .main-content {
             position: relative; /* Устанавливает основной контент как относительный для правильного позиционирования */
             z-index: 1; /* Устанавливает контент выше фона */
-        }
-        .main-content {
-            background-color: #f8f9fa; /* Светлый фон для основного контента */
+            background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон для основного контента */
             padding: 40px; /* Отступы для основного контента */
             border-radius: 8px; /* Закругленные углы */
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Тень для основного контента */
         }
+
+        .habit-card {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .habit-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
         .generate-button {
             transition: background-color 0.3s, transform 0.3s; /* Плавный переход для кнопки */
         }
+
         .generate-button:hover {
             background-color: #0056b3; /* Темнее при наведении */
             transform: scale(1.05); /* Увеличение кнопки при наведении */
+        }
+
+        .btn-success {
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn-success:hover {
+            background-color: #218838; /* Темнее при наведении */
+            transform: scale(1.05);
         }
     </style>
 {% endblock %}

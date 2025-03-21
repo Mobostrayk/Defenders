@@ -12,7 +12,7 @@
     <main class="main-content container mt-5">
         <h1 class="text-center mb-4">Профиль пользователя: {{ profile.user.username }}</h1>
 
-        <div class="text-center mb-4">
+        <div class="text-center d-flex align-items-center justify-content-center mb-4">
             {% if profile.avatar %}
                 <img src="{{ profile.avatar.url }}" alt="Аватарка" class="img-fluid rounded-circle" width="150">
             {% else %}
