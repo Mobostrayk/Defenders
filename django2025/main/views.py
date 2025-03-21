@@ -12,18 +12,31 @@ import random
 def about(request):
     return render(request,'main/about.html')
 
+
 @login_required
 def index(request):
     # Получаем все привычки
     habits = Habit.objects.all()
-    # Выбираем случайную привычку
-    random_habit = random.choice(habits) if habits else None
-    # Проверяем, есть ли уже эта привычка у пользователя
-    has_habit = UserHabit.objects.filter(user=request.user, habit=random_habit).exists() if random_habit else False
+
+    if habits.exists():  # Если есть привычки в базе
+        # Исключаем привычки, которые уже сохранены пользователем
+        user_habits = UserHabit.objects.filter(user=request.user).values_list('habit_id', flat=True)
+        available_habits = habits.exclude(id__in=user_habits)
+
+        if available_habits.exists():  # Если есть доступные привычки
+            random_habit = random.choice(available_habits)  # Выбираем случайную привычку
+            has_habit = False
+        else:
+            random_habit = None  # Нет доступных привычек
+            has_habit = True
+    else:
+        random_habit = None  # Нет привычек в базе
+        has_habit = False
 
     return render(request, 'main/index.html', {
         'random_habit': random_habit,
         'has_habit': has_habit,
+        'habits_exist': habits.exists(),  # Передаем информацию о наличии привычек
     })
 
 @login_required

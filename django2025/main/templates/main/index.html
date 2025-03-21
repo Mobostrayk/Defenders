@@ -1,5 +1,5 @@
 {% extends 'main/layout.html' %}
-{% load static %}  <!-- Загрузка тега static -->
+{% load static %}
 {% block title %}HHabits{% endblock %}
 
 {% block content %}
@@ -9,41 +9,46 @@
         <h2 class="display-4 mb-4">Создавайте и отслеживайте свои привычки</h2>
         <p class="lead mb-4">Генерируйте полезные привычки и следите за их выполнением. Отслеживание привычек поможет вам улучшить свою жизнь.</p>
 
-        <!-- Блок для генерации привычек -->
-        {% if random_habit %}
-            <div class="habit-card p-4 mb-4 bg-white rounded shadow-sm">
+        <!-- Кнопка для генерации привычки -->
+        <a href="{% url 'index' %}?generate=true" class="btn btn-primary btn-lg generate-button">Сгенерировать привычку</a>
+
+        <!-- Блок для отображения привычки -->
+        {% if request.GET.generate and random_habit %}
+            <div class="habit-card p-4 mb-4 bg-white rounded shadow-sm mt-4">
                 <h3 class="habit-name">{{ random_habit.name }}</h3>
                 {% if not has_habit %}
-                    <a href="{% url 'save_habit' random_habit.id %}" class="btn btn-success btn-lg mt-3">Сохранить привычку</a>
+                    <a href="{% if user.is_authenticated %}{% url 'save_habit' random_habit.id %}{% else %}{% url 'login' %}{% endif %}"
+                       class="btn btn-success btn-lg mt-3">
+                        Сохранить привычку
+                    </a>
                 {% else %}
                     <p class="text-muted mt-3">Вы уже сохранили эту привычку.</p>
                 {% endif %}
             </div>
-            <a href="{% url 'index' %}" class="btn btn-primary btn-lg generate-button">Сгенерировать другую привычку</a>
-        {% else %}
-            <p class="text-muted">Привычки не найдены.</p>
+        {% elif request.GET.generate and not random_habit %}
+            <p class="text-muted mt-4">Привычки не найдены.</p>
         {% endif %}
     </main>
 
     <style>
         .background {
-            background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}"); /* Укажите путь к вашему изображению */
-            background-size: cover; /* Заставляет изображение занимать весь фон */
-            background-position: center; /* Центрирует изображение */
-            filter: blur(5px); /* Применяет размытие к фону */
-            position: fixed; /* Фиксирует фон */
+            background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            filter: blur(5px);
+            position: fixed;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Устанавливает фон ниже остальных элементов */
+            z-index: -1;
         }
 
         .main-content {
-            position: relative; /* Устанавливает основной контент как относительный для правильного позиционирования */
-            z-index: 1; /* Устанавливает контент выше фона */
-            background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон для основного контента */
-            padding: 40px; /* Отступы для основного контента */
-            border-radius: 8px; /* Закругленные углы */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Тень для основного контента */
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .habit-card {
@@ -62,12 +67,12 @@
         }
 
         .generate-button {
-            transition: background-color 0.3s, transform 0.3s; /* Плавный переход для кнопки */
+            transition: background-color 0.3s, transform 0.3s;
         }
 
         .generate-button:hover {
-            background-color: #0056b3; /* Темнее при наведении */
-            transform: scale(1.05); /* Увеличение кнопки при наведении */
+            background-color: #0056b3;
+            transform: scale(1.05);
         }
 
         .btn-success {
@@ -75,7 +80,7 @@
         }
 
         .btn-success:hover {
-            background-color: #218838; /* Темнее при наведении */
+            background-color: #218838;
             transform: scale(1.05);
         }
     </style>

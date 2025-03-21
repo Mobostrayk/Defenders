@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout as auth_logout
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from users.models import UserHabit
 
 
 def registration(request):
@@ -40,11 +41,18 @@ def logout(request):
     auth_logout(request)
     return redirect('index')
 
+
 @login_required
 def profile(request):
-    user_profile = get_object_or_404(Profile, user=request.user)
-    return render(request, 'users/profile.html', {'profile': user_profile})
+    # Получаем профиль пользователя
+    user_profile = Profile.objects.get(user=request.user)
+    # Получаем все привычки пользователя
+    user_habits = UserHabit.objects.filter(user=request.user).select_related('habit')
 
+    return render(request, 'users/profile.html', {
+        'profile': user_profile,  # Передаем профиль
+        'user_habits': user_habits,  # Передаем привычки
+    })
 
 
 
