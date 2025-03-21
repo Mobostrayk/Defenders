@@ -13,15 +13,17 @@ def about(request):
     return render(request,'main/about.html')
 
 
-@login_required
 def index(request):
     # Получаем все привычки
     habits = Habit.objects.all()
 
     if habits.exists():  # Если есть привычки в базе
-        # Исключаем привычки, которые уже сохранены пользователем
-        user_habits = UserHabit.objects.filter(user=request.user).values_list('habit_id', flat=True)
-        available_habits = habits.exclude(id__in=user_habits)
+        # Если пользователь авторизован, исключаем его сохраненные привычки
+        if request.user.is_authenticated:
+            user_habits = UserHabit.objects.filter(user=request.user).values_list('habit_id', flat=True)
+            available_habits = habits.exclude(id__in=user_habits)
+        else:
+            available_habits = habits  # Для неавторизованных пользователей все привычки доступны
 
         if available_habits.exists():  # Если есть доступные привычки
             random_habit = random.choice(available_habits)  # Выбираем случайную привычку
@@ -39,7 +41,8 @@ def index(request):
         'habits_exist': habits.exists(),  # Передаем информацию о наличии привычек
     })
 
-@login_required
+
+@login_required(login_url='login')  # Перенаправление на страницу входа
 def save_habit(request, habit_id):
     habit = get_object_or_404(Habit, id=habit_id)
     UserHabit.objects.get_or_create(user=request.user, habit=habit)
