@@ -22,7 +22,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
-                            {{ form.password|add_class:"form-control form-control-lg" }}  <!-- Используем фильтр add_class -->
+                            <div class="input-group">
+                                {{ form.password|add_class:"form-control form-control-lg" }}  <!-- Используем фильтр add_class -->
+                                <button type="button" class="btn btn-outline-primary toggle-password" onclick="togglePasswordVisibility('{{ form.password.id_for_label }}')">
+                                    <i class="fas fa-eye"></i> <!-- Иконка "глазика" из Font Awesome -->
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 btn-lg">Войти</button>
                     </form>
@@ -54,5 +59,39 @@
         position: relative; /* Устанавливает контейнер как относительный для правильного позиционирования */
         z-index: 1; /* Устанавливает контейнер выше фона */
     }
+
+    .toggle-password {
+        border-color: #0d6efd; /* Синий цвет рамки */
+        transition: background-color 0.3s, border-color 0.3s; /* Плавные переходы */
+    }
+
+    .toggle-password:hover {
+        background-color: #0d6efd; /* Синий фон при наведении */
+        border-color: #0d6efd; /* Синий цвет рамки при наведении */
+    }
+
+    .toggle-password i {
+        color: #0d6efd; /* Синий цвет иконки */
+        transition: color 0.3s; /* Плавный переход цвета иконки */
+    }
+
+    .toggle-password:hover i {
+        color: white; /* Белый цвет иконки при наведении */
+    }
 </style>
+
+<!-- Подключение Font Awesome для иконки "глазика" -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- JavaScript для переключения видимости пароля -->
+<script>
+    function togglePasswordVisibility(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+        } else {
+            passwordField.type = "password";
+        }
+    }
+</script>
 {% endblock %}
