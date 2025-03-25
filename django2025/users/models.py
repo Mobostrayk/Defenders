@@ -1,10 +1,20 @@
-
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
 from django.utils import timezone
+from datetime import timedelta
+from django.conf import settings
 
+class TempRegistration(models.Model):
+    username = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)
+    verification_code = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(default=timezone.now)
 
+    def is_expired(self):
+        expire_seconds = getattr(settings, 'VERIFICATION_CODE_EXPIRE_SECONDS', 7200)
+        return (timezone.now() - self.created_at).total_seconds() > expire_seconds
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

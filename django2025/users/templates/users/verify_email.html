@@ -1,0 +1,32 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header text-center">
+                    <h4>Подтверждение email</h4>
+                </div>
+                <div class="card-body">
+                    <p>На адрес <strong>{{ email }}</strong> был отправлен код подтверждения.</p>
+                    <p>Пожалуйста, введите его в поле ниже:</p>
+                    
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Код подтверждения</label>
+                            <input type="text" class="form-control" id="code" name="code" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Подтвердить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

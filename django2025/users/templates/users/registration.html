@@ -19,7 +19,7 @@
                         {% csrf_token %}
                         {{ form.non_field_errors }}
 
-                        <!-- Поле username с динамической проверкой -->
+                        <!-- Поле username -->
                         <div class="mb-3">
                             <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
                             {{ form.username|add_class:"form-control" }}
@@ -27,13 +27,15 @@
                             {{ form.username.errors }}
                         </div>
 
+                        <!-- Поле email с динамической проверкой -->
                         <div class="mb-3">
                             <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
                             {{ form.email|add_class:"form-control" }}
+                            <div class="invalid-feedback" id="email-error" style="display: none;"></div>
                             {{ form.email.errors }}
                         </div>
 
-                        <!-- Поле password1 с динамической проверкой -->
+                        <!-- Поле password1 -->
                         <div class="mb-3">
                             <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
                             <div class="input-group">
@@ -46,7 +48,7 @@
                             {{ form.password1.errors }}
                         </div>
 
-                        <!-- Поле password2 с динамической проверкой -->
+                        <!-- Поле password2 -->
                         <div class="mb-3">
                             <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
                             <div class="input-group">
@@ -106,7 +108,7 @@
         color: white;
     }
 
-    /* Новые стили для валидации */
+    /* Стили для валидации */
     .is-invalid {
         border-color: #dc3545 !important;
     }
@@ -121,13 +123,19 @@
         font-size: 0.875em;
         margin-top: 0.25rem;
     }
+
+    /* Стиль для кнопки при неактивной форме */
+    .btn-disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
 </style>
 
 <!-- Подключение Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <script>
-    // Функция для переключения видимости пароля (ваша оригинальная)
+    // Функция для переключения видимости пароля
     function togglePasswordVisibility(fieldId) {
         const passwordField = document.getElementById(fieldId);
         if (passwordField.type === "password") {
@@ -137,7 +145,7 @@
         }
     }
 
-    // НОВЫЙ КОД: Проверка доступности логина через AJAX
+    // Проверка доступности логина
     function checkUsernameAvailability() {
         const usernameField = document.getElementById('{{ form.username.id_for_label }}');
         const username = usernameField.value.trim();
@@ -167,7 +175,45 @@
         return true;
     }
 
-    // НОВЫЙ КОД: Проверка сложности пароля
+    // Проверка email
+    function checkEmailAvailability() {
+        const emailField = document.getElementById('{{ form.email.id_for_label }}');
+        const email = emailField.value.trim();
+        const emailError = document.getElementById('email-error');
+
+        if (!email) {
+            emailField.classList.remove('is-invalid');
+            emailField.classList.remove('is-valid');
+            emailError.style.display = 'none';
+            return false;
+        }
+
+        // Проверка формата email
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            emailField.classList.add('is-invalid');
+            emailError.textContent = 'Введите корректный email';
+            emailError.style.display = 'block';
+            return false;
+        }
+
+        fetch('/check_email/?email=' + encodeURIComponent(email))
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    emailField.classList.add('is-invalid');
+                    emailError.textContent = 'Этот email уже используется';
+                    emailError.style.display = 'block';
+                } else {
+                    emailField.classList.remove('is-invalid');
+                    emailField.classList.add('is-valid');
+                    emailError.style.display = 'none';
+                }
+            });
+
+        return true;
+    }
+
+    // Проверка сложности пароля
     function checkPasswordStrength() {
         const passwordField = document.getElementById('{{ form.password1.id_for_label }}');
         const password = passwordField.value;
@@ -200,7 +246,7 @@
         return true;
     }
 
-    // НОВЫЙ КОД: Проверка совпадения паролей
+    // Проверка совпадения паролей
     function checkPasswordMatch() {
         const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
         const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
@@ -219,32 +265,52 @@
         return true;
     }
 
-    // НОВЫЙ КОД: Инициализация обработчиков событий
+    // Общая проверка формы
+    function validateForm() {
+        const isUsernameValid = checkUsernameAvailability();
+        const isEmailValid = checkEmailAvailability();
+        const isPasswordValid = checkPasswordStrength();
+        const isPasswordMatch = checkPasswordMatch();
+
+        return isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatch;
+    }
+
+    // Инициализация обработчиков событий
     document.addEventListener('DOMContentLoaded', function() {
         const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+        const emailField = document.getElementById('{{ form.email.id_for_label }}');
         const password1Field = document.getElementById('{{ form.password1.id_for_label }}');
         const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
         const form = document.getElementById('registration-form');
+        const submitBtn = form.querySelector('button[type="submit"]');
 
-        // Проверка логина при потере фокуса
+        // Обработчики событий
         usernameField.addEventListener('blur', checkUsernameAvailability);
-
-        // Проверка пароля при вводе
-        password1Field.addEventListener('input', checkPasswordStrength);
-
-        // Проверка совпадения паролей при вводе
+        emailField.addEventListener('blur', checkEmailAvailability);
+        password1Field.addEventListener('input', function() {
+            checkPasswordStrength();
+            checkPasswordMatch(); // Проверяем совпадение при изменении первого пароля
+        });
         password2Field.addEventListener('input', checkPasswordMatch);
 
-        // Валидация перед отправкой формы
-        form.addEventListener('submit', function(e) {
-            const isUsernameValid = checkUsernameAvailability();
-            const isPasswordValid = checkPasswordStrength();
-            const isPasswordMatch = checkPasswordMatch();
+        // Проверка всех полей при изменении любого из них
+        [usernameField, emailField, password1Field, password2Field].forEach(field => {
+            field.addEventListener('input', function() {
+                const isValid = validateForm();
+                submitBtn.disabled = !isValid;
+                submitBtn.classList.toggle('btn-disabled', !isValid);
+            });
+        });
 
-            if (!isUsernameValid || !isPasswordValid || !isPasswordMatch) {
+        // Валидация перед отправкой
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
                 e.preventDefault();
             }
         });
+
+        // Первоначальная проверка
+        validateForm();
     });
 </script>
 {% endblock %}

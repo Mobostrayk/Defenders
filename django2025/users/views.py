@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
+from django.core.mail import send_mail
+from django.conf import settings
 from .forms import RegisterForm, LoginForm
 from .models import Profile
 from django.shortcuts import redirect
@@ -9,21 +11,8 @@ from django.contrib.auth.decorators import login_required
 from users.models import UserHabit
 from django.http import JsonResponse
 from django.contrib.auth.models import User
-
-
-def registration(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('profile')
-    else:
-        form = RegisterForm()
-    return render(request, 'users/registration.html', {'form': form})
+from .models import TempRegistration
+import uuid
 
 def user_login(request):
     if request.method == 'POST':
@@ -62,5 +51,73 @@ def check_username(request):
     exists = User.objects.filter(username__iexact=username).exists()
     return JsonResponse({'exists': exists})
 
+
+def check_email(request):
+    email = request.GET.get('email', '')
+    exists = User.objects.filter(email__iexact=email).exists()
+    return JsonResponse({'exists': exists})
+
+
+def registration(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            # Сохраняем во временную таблицу
+            temp_reg = TempRegistration(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password1']
+            )
+            temp_reg.save()
+
+            # Отправляем письмо с кодом
+            send_mail(
+                'Подтверждение регистрации',
+                f'Ваш код подтверждения: {temp_reg.verification_code}',
+                settings.DEFAULT_FROM_EMAIL,
+                [form.cleaned_data['email']],
+                fail_silently=False,
+            )
+
+            # Перенаправляем на страницу подтверждения
+            return redirect('verify_email', email=form.cleaned_data['email'])
+    else:
+        form = RegisterForm()
+    return render(request, 'users/registration.html', {'form': form})
+
+
+def verify_email(request, email):
+    if request.method == 'POST':
+        code = request.POST.get('code')
+        try:
+            temp_reg = TempRegistration.objects.get(email=email, verification_code=code)
+            if temp_reg.is_expired():
+                return render(request, 'users/verify_email.html', {
+                    'email': email,
+                    'error': 'Срок действия кода истёк. Пожалуйста, зарегистрируйтесь снова.'
+                })
+
+            # Создаем пользователя
+            user = User.objects.create_user(
+                username=temp_reg.username,
+                email=temp_reg.email,
+                password=temp_reg.password
+            )
+
+            # Удаляем временную запись
+            temp_reg.delete()
+
+            # Авторизуем пользователя
+            user = authenticate(username=temp_reg.username, password=temp_reg.password)
+            login(request, user)
+
+            return redirect('profile')
+        except TempRegistration.DoesNotExist:
+            return render(request, 'users/verify_email.html', {
+                'email': email,
+                'error': 'Неверный код подтверждения'
+            })
+
+    return render(request, 'users/verify_email.html', {'email': email})
 
 
