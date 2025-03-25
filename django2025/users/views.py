@@ -7,6 +7,8 @@ from django.contrib.auth import logout as auth_logout
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from users.models import UserHabit
+from django.http import JsonResponse
+from django.contrib.auth.models import User
 
 
 def registration(request):
@@ -53,6 +55,12 @@ def profile(request):
         'profile': user_profile,  # Передаем профиль
         'user_habits': user_habits,  # Передаем привычки
     })
+
+
+def check_username(request):
+    username = request.GET.get('username', '')
+    exists = User.objects.filter(username__iexact=username).exists()
+    return JsonResponse({'exists': exists})
 
 
 
