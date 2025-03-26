@@ -1,95 +1,256 @@
 {% extends 'main/layout.html' %}
-{% load static %}  <!-- Загрузка тега static -->
+{% load static %}
+
 {% block title %}HHabits FAQ{% endblock %}
 
 {% block content %}
-  <!-- Основной контент -->
-<div class="background"></div> <!-- Добавляем элемент для фона -->
-  <main class="main-content">
-    <section class="faq-section">
-      <h2 class="text-center">Часто задаваемые вопросы</h2>
+    <!-- Анимированный фон -->
+    <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
 
-      <div class="faq-item">
-        <h3>Зачем нужен генератор полезных привычек?</h3>
-        <p>
-          Генератор полезных привычек — это инструмент, который помогает вам внедрить в свою жизнь новые, полезные рутины.
-          Мы знаем, как сложно бывает начать что-то новое, особенно когда речь идет о долгосрочных изменениях.
-          Наш генератор предлагает простые и эффективные привычки, которые вы можете внедрить в свою повседневную жизнь.
-        </p>
-      </div>
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="glass-container faq-container">
+            <h1 class="faq-main-title">Часто задаваемые вопросы</h1>
 
-      <div class="faq-item">
-        <h3>Как это работает?</h3>
-        <p>
-          Просто нажмите кнопку "Сгенерировать" на главной странице, и вы получите случайную полезную привычку, которую можно начать практиковать уже сегодня.
-          Вы можете добавлять привычки в свой список, отслеживать прогресс и отмечать выполненные задачи.
-          Со временем эти небольшие изменения приведут к большим результатам!
-        </p>
-      </div>
+            <div class="faq-items">
+                <div class="faq-item">
+                    <h3 class="faq-question">Зачем нужен генератор полезных привычек?</h3>
+                    <div class="faq-answer">
+                        <p>Генератор полезных привычек — это инструмент, который помогает вам внедрить в свою жизнь новые, полезные рутины. Мы знаем, как сложно бывает начать что-то новое, особенно когда речь идет о долгосрочных изменениях. Наш генератор предлагает простые и эффективные привычки, которые вы можете внедрить в свою повседневную жизнь.</p>
+                    </div>
+                </div>
 
-      <div class="faq-item">
-        <h3>Почему это важно?</h3>
-        <p>
-          Привычки формируют нашу жизнь. Они определяют, как мы проводим свои дни, как мы достигаем целей и как мы чувствуем себя.
-          Полезные привычки, такие как регулярные тренировки, здоровое питание или чтение книг, помогают нам становиться лучше каждый день.
-          Наш генератор — это ваш помощник на пути к лучшей версии себя.
-        </p>
-      </div>
-    </section>
-  </main>
+                <div class="faq-item">
+                    <h3 class="faq-question">Как это работает?</h3>
+                    <div class="faq-answer">
+                        <p>Просто нажмите кнопку "Сгенерировать" на главной странице, и вы получите случайную полезную привычку, которую можно начать практиковать уже сегодня. Вы можете добавлять привычки в свой список, отслеживать прогресс и отмечать выполненные задачи. Со временем эти небольшие изменения приведут к большим результатам!</p>
+                    </div>
+                </div>
 
-  <style>
-      .background {
-            background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}"); /* Укажите путь к вашему изображению */
-            background-size: cover; /* Заставляет изображение занимать весь фон */
-            background-position: center; /* Центрирует изображение */
-            filter: blur(5px); /* Применяет размытие к фону */
-            position: fixed; /* Фиксирует фон */
+                <div class="faq-item">
+                    <h3 class="faq-question">Почему это важно?</h3>
+                    <div class="faq-answer">
+                        <p>Привычки формируют нашу жизнь. Они определяют, как мы проводим свои дни, как мы достигаем целей и как мы чувствуем себя. Полезные привычки, такие как регулярные тренировки, здоровое питание или чтение книг, помогают нам становиться лучше каждый день. Наш генератор — это ваш помощник на пути к лучшей версии себя.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Переключение темы (как на главной странице)
+        const themeToggle = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+
+    <style>
+        /* Основные стили из главной страницы */
+        :root {
+            /* Светлая тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+            --bg-color-1: #FFE8E7;
+            --bg-color-2: #F6E8FF;
+            --bg-accent: #e0e7ff;
+        }
+
+        [data-theme="dark"] {
+            /* Тёмная тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(31, 41, 55, 0.3);
+            --glass-border: rgba(55, 65, 81, 0.4);
+            --text-dark: #f3f4f6;
+            --text-light: #1f2937;
+            --card-bg: rgba(31, 41, 55, 0.9);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --bg-color-1: #391C3A;
+            --bg-color-2: #312741;
+            --bg-accent: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Устанавливает фон ниже остальных элементов */
+            background: linear-gradient(-45deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-1), var(--bg-color-2));
+            background-size: 400% 400%;
+            z-index: -2;
+            animation: gradientBG 15s ease infinite;
         }
 
-        .avatar-placeholder {
-            border: 2px dashed #ccc;
-            font-size: 14px;
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
+        /* Переключатель темы (как на главной) */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sun-moon {
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .sun {
+            display: none;
+        }
+
+        [data-theme="light"] .moon {
+            display: none;
+        }
+
+        /* Основной контент */
         .main-content {
-            position: relative; /* Устанавливает основной контент как относительный для правильного позиционирования */
-            z-index: 1; /* Устанавливает контент выше фона */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
         }
-    .faq-section {
-      max-width: 800px; /* Ограничение ширины секции */
-      margin: 0 auto; /* Центрирование секции */
-      padding: 20px; /* Отступы внутри секции */
-      background-color: #f9f9f9; /* Светлый фон для секции */
-      border-radius: 8px; /* Закругленные углы */
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Тень для секции */
-    }
 
-    .faq-item {
-      margin-bottom: 20px; /* Отступ между элементами FAQ */
-      padding: 15px; /* Отступы внутри элемента FAQ */
-      background-color: #ffffff; /* Белый фон для каждого элемента */
-      border-radius: 5px; /* Закругленные углы для элементов */
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Тень для элементов */
-    }
+        .glass-container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
 
-    .faq-item h3 {
-      color: #007bff; /* Цвет заголовка */
-      margin-bottom: 10px; /* Отступ снизу заголовка */
-    }
+        /* Стили FAQ */
+        .faq-main-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    .faq-item p {
-      line-height: 1.6; /* Высота строки для лучшей читабельности */
-      color: #333; /* Цвет текста */
-    }
+        .faq-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
 
-    .text-center {
-      text-align: center; /* Центрирование текста */
-    }
-  </style>
+        .faq-item {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
 
+        .faq-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
 
+        .faq-question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .faq-answer {
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .faq-answer p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .glass-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .faq-main-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .faq-main-title {
+                font-size: 1.6rem;
+            }
+
+            .faq-question {
+                font-size: 1.1rem;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+        }
+    </style>
 {% endblock %}

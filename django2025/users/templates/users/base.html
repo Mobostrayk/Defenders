@@ -9,53 +9,220 @@
     <title>{% block title %} {% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'users/css/users.css' %}">
+    <!-- Подключаем стильные шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .top-bar {
-            background-color: #007bff; /* Синий цвет фона */
-            color: white; /* Цвет текста */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* Основные переменные цветов и шрифтов */
+        :root {
+            --dark: #2D3436;       /* Основной темный цвет текста */
+            --primary: #8b5cf6;    /* Основной акцентный цвет (изменён под общий стиль) */
+            --primary-hover: #7c3aed; /* Цвет акцента при наведении */
+            --light: #FFFFFF;      /* Светлый фон */
+            --gray: #636E72;       /* Серый цвет для второстепенного текста */
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Плавные переходы */
+            --font-main: 'Manrope', sans-serif; /* Основной шрифт */
+            --font-heading: 'Montserrat', sans-serif; /* Шрифт для заголовков */
+            --top-bar-bg: #FFFFFF; /* Фон верхней панели */
+            --top-bar-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); /* Тень панели */
         }
-        .nav-link {
-            color: white; /* Цвет ссылок */
-            margin-right: 15px;
-            transition: color 0.3s;
+
+        /* Тёмная тема */
+        [data-theme="dark"] {
+            --dark: #f3f4f6;
+            --light: #1f2937;
+            --gray: #9CA3AF;
+            --top-bar-bg: #1f2937;
+            --top-bar-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
         }
-        .nav-link:hover {
-            color: #e0e0e0; /* Цвет ссылок при наведении */
-            text-decoration: underline;
-        }
-        .center-title {
-            flex-grow: 1; /* Позволяет заголовку занимать доступное пространство */
-            text-align: center; /* Центрирование текста */
-            margin: 0 auto; /* Центрирование заголовка */
-        }
-        .center-title h1 {
-            font-size: 1.5rem;
-            font-weight: bold;
+
+        /* Базовые стили для всех элементов */
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Стили для body */
+        body {
+            background-color: #F5F6FA; /* Светло-серый фон страницы */
+            color: var(--dark);        /* Цвет текста по умолчанию */
+            min-height: 100vh;         /* Минимальная высота на весь экран */
+            font-family: var(--font-main); /* Основной шрифт */
+            line-height: 1.6;          /* Удобочитаемый межстрочный интервал */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #111827;
+        }
+
+        /* Стили для верхней панели */
+        .top-bar {
+            background-color: var(--top-bar-bg);
+            color: var(--dark);
+            box-shadow: var(--top-bar-shadow);
+            padding: 1.2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Контейнер для содержимого панели */
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        /* Стили для левых ссылок */
+        .left-links {
+            display: flex;
+            gap: 2.5rem;
+            flex: 1;
+        }
+
+        /* Стили для правых ссылок */
+        .right-links {
+            display: flex;
+            justify-content: flex-end;
+            flex: 1;
+        }
+
+        /* Стили для отдельных ссылок */
+        .nav-link {
+            color: var(--gray);
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* Специальные стили для кнопки FAQ */
+        .faq-link {
+            background-color: var(--primary);
+            color: white !important;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+            transition: var(--transition);
+            margin-left: 1rem;
+        }
+
+        /* Состояние при наведении на ссылки */
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        /* Состояние при наведении на FAQ */
+        .faq-link:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        /* Контейнер для заголовка */
+        .title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Стили для самого заголовка */
+        .title h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--dark);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            font-family: var(--font-heading);
+        }
+
+        /* Адаптивность для планшетов */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1.2rem;
+                padding: 1.2rem 1.5rem;
+            }
+
+            .title {
+                position: static;
+                transform: none;
+                order: -1;
+                margin-bottom: 0.8rem;
+            }
+
+            .left-links, .right-links {
+                justify-content: center;
+                gap: 1.5rem;
+                width: 100%;
+            }
+
+            .faq-link {
+                margin-left: 0;
+            }
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 480px) {
+            .left-links, .right-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .title h1 {
+                font-size: 1.4rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="top-bar py-3">
-        <div class="container">
-            <div class="d-flex align-items-center">
-                <div class="left-links d-flex">
-                    <a href="{% url 'profile' %}" class="nav-link">Профиль</a>
-                    <a href="#" class="nav-link">Список привычек</a>
-                    <a href="#" class="nav-link">Добавить привычку</a>
-                </div>
-                <div class="center-title">
-                    <h1 class="h4 mb-0">Генератор привычек</h1>
-                </div>
-                <div class="right-links">
-                    <a href="{% url 'about' %}" class="nav-link">FAQ</a>
-                </div>
+    <!-- Верхняя панель навигации -->
+    <header class="top-bar">
+        <div class="nav-container">
+            <!-- Левые ссылки -->
+            <div class="left-links">
+                <a href="#" class="nav-link">Главная</a>
+                <a href="{% url 'profile' %}" class="nav-link">Профиль</a>
+                <a href="#" class="nav-link">Отзывы</a>
+            </div>
+
+            <!-- Центрированный заголовок -->
+            <div class="title">
+                <h1>Генератор привычек</h1>
+            </div>
+
+            <!-- Правая часть - только FAQ -->
+            <div class="right-links">
+                <a href="{% url 'about' %}" class="nav-link faq-link">FAQ</a>
             </div>
         </div>
     </header>
 
     {% block content %}
     {% endblock %}
+
+    <script>
+        // Проверяем сохранённую тему при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
 </body>
 </html>

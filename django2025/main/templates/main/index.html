@@ -4,84 +4,405 @@
 
 {% block content %}
     <!-- Основной контент -->
-    <div class="background"></div> <!-- Добавляем элемент для фона -->
-    <main class="main-content container text-center mt-5">
-        <h2 class="display-4 mb-4">Создавайте и отслеживайте свои привычки</h2>
-        <p class="lead mb-4">Генерируйте полезные привычки и следите за их выполнением. Отслеживание привычек поможет вам улучшить свою жизнь.</p>
+    <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
+    <main class="main-content">
+        <div class="glass-container">
+            <h1 class="main-title">Создавайте и отслеживайте свои привычки</h1>
+            <p class="subtitle">Генерируйте полезные привычки и следите за их выполнением.<br>Отслеживание привычек поможет вам улучшить жизнь</p>
 
-        <!-- Кнопка для генерации привычки -->
-        <a href="{% url 'index' %}?generate=true" class="btn btn-primary btn-lg generate-button">Сгенерировать привычку</a>
+            <!-- Кнопка генерации -->
+            <a href="{% url 'index' %}?generate=true" class="generate-btn">
+                <span class="btn-text">Сгенерировать привычку</span>
+                <span class="btn-arrow">→</span>
+                <div class="liquid"></div>
+            </a>
 
-        <!-- Блок для отображения привычки -->
-        {% if request.GET.generate and random_habit %}
-            <div class="habit-card p-4 mb-4 bg-white rounded shadow-sm mt-4">
-                <h3 class="habit-name">{{ random_habit.name }}</h3>
-                {% if not has_habit %}
-                    <a href="{% if user.is_authenticated %}{% url 'save_habit' random_habit.id %}{% else %}{% url 'login' %}{% endif %}"
-                       class="btn btn-success btn-lg mt-3">
-                        Сохранить привычку
-                    </a>
-                {% else %}
-                    <p class="text-muted mt-3">Вы уже сохранили эту привычку.</p>
-                {% endif %}
+            <!-- Блок привычки -->
+            {% if request.GET.generate and random_habit %}
+            <div class="habit-card">
+                <div class="card-content">
+                    <h3>{{ random_habit.name }}</h3>
+                    {% if not has_habit %}
+                        <a href="{% if user.is_authenticated %}{% url 'save_habit' random_habit.id %}{% else %}{% url 'login' %}{% endif %}"
+                           class="save-btn">
+                            Сохранить в мои привычки
+                            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 12l5 5 10-10" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                        </a>
+                    {% else %}
+                        <div class="saved-badge">
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 12l5 5 10-10" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                            Уже сохранено
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        {% elif request.GET.generate and not random_habit %}
-            <p class="text-muted mt-4">Привычки не найдены.</p>
-        {% endif %}
+            {% endif %}
+        </div>
     </main>
 
+    <script>
+        // Переключение темы с сохранением в localStorage
+        const themeToggle = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Анимация кнопки при hover
+        const generateBtn = document.querySelector('.generate-btn');
+        generateBtn.addEventListener('mouseenter', () => {
+            generateBtn.classList.add('hover-effect');
+        });
+        generateBtn.addEventListener('mouseleave', () => {
+            generateBtn.classList.remove('hover-effect');
+        });
+    </script>
+
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            /* Светлая тема (по умолчанию) */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+            --bg-color-1: #FFE8E7;
+            --bg-color-2: #F6E8FF;
+            --bg-accent: #e0e7ff;
+        }
+
+        [data-theme="dark"] {
+            /* Тёмная тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(31, 41, 55, 0.3);
+            --glass-border: rgba(55, 65, 81, 0.4);
+            --text-dark: #f3f4f6;
+            --text-light: #1f2937;
+            --card-bg: rgba(31, 41, 55, 0.9);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --bg-color-1: #391C3A;
+            --bg-color-2: #312741;
+            --bg-accent: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
         .background {
-            background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}");
-            background-size: cover;
-            background-position: center;
-            filter: blur(5px);
             position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            background: linear-gradient(-45deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-1), var(--bg-color-2));
+            background-size: 400% 400%;
+            z-index: -2;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Кнопка переключения темы */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sun-moon {
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .sun {
+            display: none;
+        }
+
+        [data-theme="light"] .moon {
+            display: none;
         }
 
         .main-content {
-            position: relative;
-            z-index: 1;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
         }
 
-        .habit-card {
+        .glass-container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 3rem 2.5rem;
+            width: 100%;
             max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fff;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
         }
 
-        .habit-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
+        .main-title {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .generate-button {
-            transition: background-color 0.3s, transform 0.3s;
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            opacity: 0.9;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
         }
 
-        .generate-button:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
+        /* Анимированная кнопка генерации */
+        .generate-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem 2.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            margin-bottom: 2rem;
+            z-index: 1;
         }
 
-        .btn-success {
-            transition: background-color 0.3s, transform 0.3s;
+        .generate-btn .btn-text {
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s ease;
         }
 
-        .btn-success:hover {
-            background-color: #218838;
-            transform: scale(1.05);
+        .generate-btn .btn-arrow {
+            position: relative;
+            z-index: 2;
+            margin-left: 10px;
+            transform: translateX(0);
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn.hover-effect .btn-text {
+            transform: translateX(-5px);
+        }
+
+        .generate-btn.hover-effect .btn-arrow {
+            transform: translateX(5px);
+        }
+
+        .generate-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5);
+        }
+
+        .liquid {
+            position: absolute;
+            top: -80px;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: var(--primary);
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
+            z-index: -1;
+            transition: 1s;
+        }
+
+        .liquid::after,
+        .liquid::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -75%);
+            background: #fff;
+        }
+
+        .liquid::before {
+            border-radius: 45%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: animate 8s linear infinite;
+        }
+
+        .liquid::after {
+            border-radius: 40%;
+            background: rgba(255, 255, 255, 0.2);
+            animation: animate 15s linear infinite;
+        }
+
+        @keyframes animate {
+            0% { transform: translate(-50%, -75%) rotate(0deg); }
+            100% { transform: translate(-50%, -75%) rotate(360deg); }
+        }
+
+        .generate-btn:hover .liquid {
+            top: -120px;
+        }
+
+        /* Карточка привычки */
+        .habit-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.8rem;
+            margin-top: 1.5rem;
+            box-shadow: var(--shadow);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.5s forwards;
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(8px);
+        }
+
+        .habit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes fadeInUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .habit-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        /* Кнопка сохранения */
+        .save-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.8rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+        }
+
+        .saved-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.8rem;
+            background: var(--bg-accent);
+            color: var(--text-dark);
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 640px) {
+            .glass-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .main-title {
+                font-size: 1.8rem;
+            }
+
+            .generate-btn {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+
+            .glass-container {
+                padding: 1.8rem 1.2rem;
+            }
+
+            .main-title {
+                font-size: 1.6rem;
+            }
         }
     </style>
 {% endblock %}

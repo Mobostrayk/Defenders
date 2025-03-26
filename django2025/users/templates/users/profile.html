@@ -1,90 +1,417 @@
 {% extends 'users/base.html' %}
+{% load static %}
 
-{% load static %}  <!-- Загрузка тега static -->
-
-{% block title %}HHabits{% endblock %}
+{% block title %}HHabits - Профиль{% endblock %}
 
 {% block content %}
-    <!-- Новый элемент для фона -->
+    <!-- Анимированный фон -->
     <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
 
     <!-- Основной контент -->
-    <main class="main-content container mt-5">
-        <h1 class="text-center mb-4">Профиль пользователя: {{ profile.user.username }}</h1>
+    <main class="main-content">
+        <div class="glass-container profile-container">
+            <h1 class="profile-title">Профиль: {{ profile.user.username }}</h1>
 
-        <div class="text-center d-flex align-items-center justify-content-center mb-4">
-            {% if profile.avatar %}
-                <img src="{{ profile.avatar.url }}" alt="Аватарка" class="img-fluid rounded-circle" width="150">
-            {% else %}
-                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; background-color: #f0f0f0;">
-                    <span class="text-muted">Аватарка не установлена.</span>
+            <!-- Аватар -->
+            <div class="avatar-container">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Аватар" class="avatar-image">
+                {% else %}
+                    <div class="avatar-placeholder">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Информация профиля -->
+            <div class="profile-info">
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ profile.user.email }}</span>
                 </div>
-            {% endif %}
-        </div>
+                <div class="info-item">
+                    <span class="info-label">Дата регистрации:</span>
+                    <span class="info-value">{{ profile.user.date_joined|date:"d.m.Y" }}</span>
+                </div>
+            </div>
 
-        <div class="profile-info text-center">
-            <p><strong>Email:</strong> {{ profile.user.email }}</p>
-            <p><strong>Дата регистрации:</strong> {{ profile.user.date_joined|date:"d.m.Y" }}</p>
-        </div>
+            <!-- Привычки пользователя -->
+            <div class="habits-section">
+                <h2 class="habits-title">Ваши привычки</h2>
+                {% if user_habits %}
+                    <div class="habits-list">
+                        {% for user_habit in user_habits %}
+                            <div class="habit-card">
+                                <h3 class="habit-name">{{ user_habit.habit.name }}</h3>
+                                <p class="habit-date">Добавлено: {{ user_habit.created_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-habits">У вас пока нет сохранённых привычек</p>
+                {% endif %}
+            </div>
 
-        <!-- Блок для отображения привычек -->
-        <div class="mt-5">
-            <h2 class="text-center mb-4">Ваши привычки:</h2>
-            {% if user_habits %}
-                <ul class="list-unstyled">
-                    {% for user_habit in user_habits %}
-                        <li class="habit-card p-4 mb-3 bg-white rounded shadow-sm">
-                            <h4 class="habit-name">{{ user_habit.habit.name }}</h4>
-                            <p class="text-muted">Добавлено: {{ user_habit.created_at|date:"d.m.Y H:i" }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted text-center">У вас пока нет сохраненных привычек.</p>
-            {% endif %}
-        </div>
-
-        <div class="text-center mt-4">
-            <a href="{% url 'index' %}" class="btn btn-primary">На главную</a>
-            <a href="{% url 'logout' %}" class="btn btn-danger">Выйти</a>  <!-- Кнопка выхода -->
+            <!-- Кнопки действий -->
+            <div class="profile-actions">
+                <a href="{% url 'index' %}" class="action-btn primary-btn">
+                    <span>На главную</span>
+                </a>
+                <a href="{% url 'logout' %}" class="action-btn secondary-btn">
+                    <span>Выйти</span>
+                </a>
+            </div>
         </div>
     </main>
 
+    <script>
+        // Переключение темы (как на главной странице)
+        const themeToggle = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+
     <style>
+        /* Основные стили из главной страницы */
+        :root {
+            /* Светлая тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+            --bg-color-1: #FFE8E7;
+            --bg-color-2: #F6E8FF;
+            --bg-accent: #e0e7ff;
+        }
+
+        [data-theme="dark"] {
+            /* Тёмная тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(31, 41, 55, 0.3);
+            --glass-border: rgba(55, 65, 81, 0.4);
+            --text-dark: #f3f4f6;
+            --text-light: #1f2937;
+            --card-bg: rgba(31, 41, 55, 0.9);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --bg-color-1: #391C3A;
+            --bg-color-2: #312741;
+            --bg-accent: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
         .background {
-            background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}"); /* Укажите путь к вашему изображению */
-            background-size: cover; /* Заставляет изображение занимать весь фон */
-            background-position: center; /* Центрирует изображение */
-            filter: blur(5px); /* Применяет размытие к фону */
-            position: fixed; /* Фиксирует фон */
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Устанавливает фон ниже остальных элементов */
+            background: linear-gradient(-45deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-1), var(--bg-color-2));
+            background-size: 400% 400%;
+            z-index: -2;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Переключатель темы (как на главной) */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sun-moon {
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .sun {
+            display: none;
+        }
+
+        [data-theme="light"] .moon {
+            display: none;
+        }
+
+        /* Основной контент */
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .glass-container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            margin: 0 auto;
+        }
+
+        /* Стили профиля */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            width: 100%;
+            text-align: center;
+        }
+
+        .avatar-container {
+            margin-bottom: 2rem;
+        }
+
+        .avatar-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            box-shadow: var(--shadow);
         }
 
         .avatar-placeholder {
-            border: 2px dashed #ccc;
-            font-size: 14px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-accent);
+            border: 3px dashed var(--primary);
+            color: var(--primary);
         }
 
-        .main-content {
-            position: relative; /* Устанавливает основной контент как относительный для правильного позиционирования */
-            z-index: 1; /* Устанавливает контент выше фона */
+        .profile-info {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .info-item {
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .info-value {
+            color: var(--text-dark);
+        }
+
+        .habits-section {
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .habits-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .habits-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
         }
 
         .habit-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            width: 100%;
             max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fff;
+            text-align: center;
+        }
+
+        .habit-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .habit-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .habit-date {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+
+        .no-habits {
+            color: var(--text-dark);
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .primary-btn {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .primary-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            color: white;
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .glass-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .profile-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-title {
+                font-size: 1.6rem;
+            }
+
+            .avatar-image, .avatar-placeholder {
+                width: 120px;
+                height: 120px;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.2rem;
+                height: 2.2rem;
+            }
         }
     </style>
-{% endblock %}  <!-- Закрывающий тег для блока content -->
+{% endblock %}
