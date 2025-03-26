@@ -5,93 +5,343 @@
 {% block title %}Авторизация{% endblock %}
 
 {% block content %}
-<div class="background"></div> <!-- Новый элемент для фона -->
-<main class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header text-center">
-                    <h4>Авторизация</h4>
+    <!-- Анимированный фон -->
+    <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="glass-container auth-container">
+            <h1 class="auth-title">Авторизация</h1>
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                    {{ form.username|add_class:"form-input" }}
                 </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
-                            {{ form.username|add_class:"form-control form-control-lg" }}  <!-- Используем фильтр add_class -->
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
-                            <div class="input-group">
-                                {{ form.password|add_class:"form-control form-control-lg" }}  <!-- Используем фильтр add_class -->
-                                <button type="button" class="btn btn-outline-primary toggle-password" onclick="togglePasswordVisibility('{{ form.password.id_for_label }}')">
-                                    <i class="fas fa-eye"></i> <!-- Иконка "глазика" из Font Awesome -->
-                                </button>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 btn-lg">Войти</button>
-                    </form>
-                    <div class="text-center mt-3">
-                        <a href="{% url 'password_reset' %}" class="btn btn-link">Восстановить пароль</a> <!-- Кнопка для восстановления пароля -->
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                    <div class="password-input">
+                        {{ form.password|add_class:"form-input" }}
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('{{ form.password.id_for_label }}')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
                     </div>
                 </div>
-                <div class="card-footer text-center">
-                    <p class="mb-0">Нет аккаунта? <a href="{% url 'registration' %}">Зарегистрируйтесь</a>.</p>
+
+                <button type="submit" class="auth-btn">Войти</button>
+
+                <div class="auth-links">
+                    <a href="{% url 'password_reset' %}" class="auth-link">Восстановить пароль</a>
+                    <span class="auth-divider">|</span>
+                    <a href="{% url 'registration' %}" class="auth-link">Зарегистрироваться</a>
                 </div>
-            </div>
+            </form>
         </div>
-    </div>
-</main>
+    </main>
 
-<style>
-    .background {
-        background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}"); /* Укажите путь к вашему изображению */
-        background-size: cover; /* Заставляет изображение занимать весь фон */
-        background-position: center; /* Центрирует изображение */
-        filter: blur(5px); /* Применяет размытие к фону */
-        position: fixed; /* Фиксирует фон */
-        width: 100%;
-        height: 100%;
-        z-index: -1; /* Устанавливает фон ниже остальных элементов */
-    }
+    <script>
+        // Переключение темы
+        const themeToggle = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
 
-    .container {
-        position: relative; /* Устанавливает контейнер как относительный для правильного позиционирования */
-        z-index: 1; /* Устанавливает контейнер выше фона */
-    }
+        document.documentElement.setAttribute('data-theme', currentTheme);
 
-    .toggle-password {
-        border-color: #0d6efd; /* Синий цвет рамки */
-        transition: background-color 0.3s, border-color 0.3s; /* Плавные переходы */
-    }
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
 
-    .toggle-password:hover {
-        background-color: #0d6efd; /* Синий фон при наведении */
-        border-color: #0d6efd; /* Синий цвет рамки при наведении */
-    }
+        // Переключение видимости пароля
+        function togglePasswordVisibility(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const icon = document.querySelector(`#${fieldId} + .toggle-password svg`);
 
-    .toggle-password i {
-        color: #0d6efd; /* Синий цвет иконки */
-        transition: color 0.3s; /* Плавный переход цвета иконки */
-    }
-
-    .toggle-password:hover i {
-        color: white; /* Белый цвет иконки при наведении */
-    }
-</style>
-
-<!-- Подключение Font Awesome для иконки "глазика" -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<!-- JavaScript для переключения видимости пароля -->
-<script>
-    function togglePasswordVisibility(fieldId) {
-        const passwordField = document.getElementById(fieldId);
-        if (passwordField.type === "password") {
-            passwordField.type = "text";
-        } else {
-            passwordField.type = "password";
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+            } else {
+                passwordField.type = "password";
+                icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+            }
         }
-    }
-</script>
+    </script>
+
+    <style>
+        /* Основные стили из главной страницы */
+        :root {
+            /* Светлая тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+            --bg-color-1: #FFE8E7;
+            --bg-color-2: #F6E8FF;
+            --bg-accent: #e0e7ff;
+            --input-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="dark"] {
+            /* Тёмная тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(31, 41, 55, 0.3);
+            --glass-border: rgba(55, 65, 81, 0.4);
+            --text-dark: #f3f4f6;
+            --text-light: #1f2937;
+            --card-bg: rgba(31, 41, 55, 0.9);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --bg-color-1: #391C3A;
+            --bg-color-2: #312741;
+            --bg-accent: #1f2937;
+            --input-bg: rgba(31, 41, 55, 0.8);
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-1), var(--bg-color-2));
+            background-size: 400% 400%;
+            z-index: -2;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Переключатель темы */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sun-moon {
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .sun {
+            display: none;
+        }
+
+        [data-theme="light"] .moon {
+            display: none;
+        }
+
+        /* Основной контент */
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .glass-container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        /* Стили формы авторизации */
+        .auth-container {
+            text-align: center;
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+
+        .password-input {
+            position: relative;
+            display: flex;
+        }
+
+        .password-input .form-input {
+            flex: 1;
+            padding-right: 3rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .auth-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .auth-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .auth-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .auth-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-divider {
+            color: var(--text-dark);
+            opacity: 0.5;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .glass-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .auth-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-title {
+                font-size: 1.6rem;
+            }
+
+            .auth-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .auth-divider {
+                display: none;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+        }
+    </style>
 {% endblock %}

@@ -6,245 +6,498 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<div class="background"></div>
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header text-center">
-                    <h4>Регистрация</h4>
+    <!-- Анимированный фон -->
+    <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="glass-container auth-container">
+            <h1 class="auth-title">Регистрация</h1>
+
+            <form method="post" id="registration-form" class="auth-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <!-- Поле username -->
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                    {{ form.username|add_class:"form-input" }}
+                    <div class="invalid-feedback" id="username-error"></div>
+                    {{ form.username.errors }}
                 </div>
-                <div class="card-body">
-                    <form method="post" id="registration-form">
-                        {% csrf_token %}
-                        {{ form.non_field_errors }}
 
-                        <!-- Поле username с динамической проверкой -->
-                        <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
-                            {{ form.username|add_class:"form-control" }}
-                            <div class="invalid-feedback" id="username-error" style="display: none;"></div>
-                            {{ form.username.errors }}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
-                            {{ form.email|add_class:"form-control" }}
-                            {{ form.email.errors }}
-                        </div>
-
-                        <!-- Поле password1 с динамической проверкой -->
-                        <div class="mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
-                            <div class="input-group">
-                                {{ form.password1|add_class:"form-control" }}
-                                <button type="button" class="btn btn-outline-primary toggle-password" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="invalid-feedback" id="password-error" style="display: none;"></div>
-                            {{ form.password1.errors }}
-                        </div>
-
-                        <!-- Поле password2 с динамической проверкой -->
-                        <div class="mb-3">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
-                            <div class="input-group">
-                                {{ form.password2|add_class:"form-control" }}
-                                <button type="button" class="btn btn-outline-primary toggle-password" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="invalid-feedback" id="password2-error" style="display: none;"></div>
-                            {{ form.password2.errors }}
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
-                    </form>
+                <!-- Поле email -->
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                    {{ form.email|add_class:"form-input" }}
+                    {{ form.email.errors }}
                 </div>
-                <div class="card-footer text-center">
-                    <p class="mb-0">Уже есть аккаунт? <a href="{% url 'login' %}">Войдите</a>.</p>
+
+                <!-- Поле password1 -->
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+                    <div class="password-input">
+                        {{ form.password1|add_class:"form-input" }}
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback" id="password-error"></div>
+                    {{ form.password1.errors }}
                 </div>
-            </div>
+
+                <!-- Поле password2 -->
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                    <div class="password-input">
+                        {{ form.password2|add_class:"form-input" }}
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}')">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback" id="password2-error"></div>
+                    {{ form.password2.errors }}
+                </div>
+
+                <button type="submit" class="auth-btn">Зарегистрироваться</button>
+
+                <div class="auth-links">
+                    <span>Уже есть аккаунт?</span>
+                    <a href="{% url 'login' %}" class="auth-link">Войти</a>
+                </div>
+            </form>
         </div>
-    </div>
-</div>
+    </main>
 
-<style>
-    .background {
-        background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}");
-        background-size: cover;
-        background-position: center;
-        filter: blur(5px);
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-    }
+    <script>
+        // Переключение темы
+        const themeToggle = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
 
-    .container {
-        position: relative;
-        z-index: 1;
-    }
+        document.documentElement.setAttribute('data-theme', currentTheme);
 
-    .toggle-password {
-        border-color: #0d6efd;
-        transition: background-color 0.3s, border-color 0.3s;
-    }
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
 
-    .toggle-password:hover {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
+        // Функция для переключения видимости пароля
+        function togglePasswordVisibility(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const icon = document.querySelector(`#${fieldId} + .toggle-password svg`);
 
-    .toggle-password i {
-        color: #0d6efd;
-        transition: color 0.3s;
-    }
-
-    .toggle-password:hover i {
-        color: white;
-    }
-
-    /* Новые стили для валидации */
-    .is-invalid {
-        border-color: #dc3545 !important;
-    }
-
-    .is-valid {
-        border-color: #28a745 !important;
-    }
-
-    .invalid-feedback {
-        display: none;
-        color: #dc3545;
-        font-size: 0.875em;
-        margin-top: 0.25rem;
-    }
-</style>
-
-<!-- Подключение Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<script>
-    // Функция для переключения видимости пароля (ваша оригинальная)
-    function togglePasswordVisibility(fieldId) {
-        const passwordField = document.getElementById(fieldId);
-        if (passwordField.type === "password") {
-            passwordField.type = "text";
-        } else {
-            passwordField.type = "password";
-        }
-    }
-
-    // НОВЫЙ КОД: Проверка доступности логина через AJAX
-    function checkUsernameAvailability() {
-        const usernameField = document.getElementById('{{ form.username.id_for_label }}');
-        const username = usernameField.value.trim();
-        const usernameError = document.getElementById('username-error');
-
-        if (username.length < 3) {
-            usernameField.classList.add('is-invalid');
-            usernameError.textContent = 'Логин должен содержать минимум 3 символа';
-            usernameError.style.display = 'block';
-            return false;
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+            } else {
+                passwordField.type = "password";
+                icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+            }
         }
 
-        fetch('/check_username/?username=' + encodeURIComponent(username))
-            .then(response => response.json())
-            .then(data => {
-                if (data.exists) {
-                    usernameField.classList.add('is-invalid');
-                    usernameError.textContent = 'Этот логин уже занят';
-                    usernameError.style.display = 'block';
-                } else {
-                    usernameField.classList.remove('is-invalid');
-                    usernameField.classList.add('is-valid');
-                    usernameError.style.display = 'none';
+        // Проверка доступности логина через AJAX
+        function checkUsernameAvailability() {
+            const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+            const username = usernameField.value.trim();
+            const usernameError = document.getElementById('username-error');
+
+            if (username.length < 3) {
+                usernameField.classList.add('is-invalid');
+                usernameError.textContent = 'Логин должен содержать минимум 3 символа';
+                usernameError.style.display = 'block';
+                return false;
+            }
+
+            fetch('/check_username/?username=' + encodeURIComponent(username))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        usernameField.classList.add('is-invalid');
+                        usernameError.textContent = 'Этот логин уже занят';
+                        usernameError.style.display = 'block';
+                    } else {
+                        usernameField.classList.remove('is-invalid');
+                        usernameField.classList.add('is-valid');
+                        usernameError.style.display = 'none';
+                    }
+                });
+
+            return true;
+        }
+
+        // Проверка сложности пароля
+        function checkPasswordStrength() {
+            const passwordField = document.getElementById('{{ form.password1.id_for_label }}');
+            const password = passwordField.value;
+            const passwordError = document.getElementById('password-error');
+
+            if (password.length < 8) {
+                passwordField.classList.add('is-invalid');
+                passwordError.textContent = 'Пароль должен содержать минимум 8 символов';
+                passwordError.style.display = 'block';
+                return false;
+            }
+
+            if (!/[A-Z]/.test(password)) {
+                passwordField.classList.add('is-invalid');
+                passwordError.textContent = 'Пароль должен содержать хотя бы одну заглавную латинскую букву';
+                passwordError.style.display = 'block';
+                return false;
+            }
+
+            if (!/[0-9]/.test(password)) {
+                passwordField.classList.add('is-invalid');
+                passwordError.textContent = 'Пароль должен содержать хотя бы одну цифру';
+                passwordError.style.display = 'block';
+                return false;
+            }
+
+            passwordField.classList.remove('is-invalid');
+            passwordField.classList.add('is-valid');
+            passwordError.style.display = 'none';
+            return true;
+        }
+
+        // Проверка совпадения паролей
+        function checkPasswordMatch() {
+            const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
+            const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
+            const password2Error = document.getElementById('password2-error');
+
+            if (password1 !== password2Field.value) {
+                password2Field.classList.add('is-invalid');
+                password2Error.textContent = 'Пароли не совпадают';
+                password2Error.style.display = 'block';
+                return false;
+            }
+
+            password2Field.classList.remove('is-invalid');
+            password2Field.classList.add('is-valid');
+            password2Error.style.display = 'none';
+            return true;
+        }
+
+        // Инициализация обработчиков событий
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+            const password1Field = document.getElementById('{{ form.password1.id_for_label }}');
+            const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
+            const form = document.getElementById('registration-form');
+
+            // Проверка логина при потере фокуса
+            usernameField.addEventListener('blur', checkUsernameAvailability);
+
+            // Проверка пароля при вводе
+            password1Field.addEventListener('input', checkPasswordStrength);
+
+            // Проверка совпадения паролей при вводе
+            password2Field.addEventListener('input', checkPasswordMatch);
+
+            // Валидация перед отправкой формы
+            form.addEventListener('submit', function(e) {
+                const isUsernameValid = checkUsernameAvailability();
+                const isPasswordValid = checkPasswordStrength();
+                const isPasswordMatch = checkPasswordMatch();
+
+                if (!isUsernameValid || !isPasswordValid || !isPasswordMatch) {
+                    e.preventDefault();
                 }
             });
-
-        return true;
-    }
-
-    // НОВЫЙ КОД: Проверка сложности пароля
-    function checkPasswordStrength() {
-        const passwordField = document.getElementById('{{ form.password1.id_for_label }}');
-        const password = passwordField.value;
-        const passwordError = document.getElementById('password-error');
-
-        if (password.length < 8) {
-            passwordField.classList.add('is-invalid');
-            passwordError.textContent = 'Пароль должен содержать минимум 8 символов';
-            passwordError.style.display = 'block';
-            return false;
-        }
-
-        if (!/[A-Z]/.test(password)) {
-            passwordField.classList.add('is-invalid');
-            passwordError.textContent = 'Пароль должен содержать хотя бы одну заглавную букву';
-            passwordError.style.display = 'block';
-            return false;
-        }
-
-        if (!/[0-9]/.test(password)) {
-            passwordField.classList.add('is-invalid');
-            passwordError.textContent = 'Пароль должен содержать хотя бы одну цифру';
-            passwordError.style.display = 'block';
-            return false;
-        }
-
-        passwordField.classList.remove('is-invalid');
-        passwordField.classList.add('is-valid');
-        passwordError.style.display = 'none';
-        return true;
-    }
-
-    // НОВЫЙ КОД: Проверка совпадения паролей
-    function checkPasswordMatch() {
-        const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
-        const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
-        const password2Error = document.getElementById('password2-error');
-
-        if (password1 !== password2Field.value) {
-            password2Field.classList.add('is-invalid');
-            password2Error.textContent = 'Пароли не совпадают';
-            password2Error.style.display = 'block';
-            return false;
-        }
-
-        password2Field.classList.remove('is-invalid');
-        password2Field.classList.add('is-valid');
-        password2Error.style.display = 'none';
-        return true;
-    }
-
-    // НОВЫЙ КОД: Инициализация обработчиков событий
-    document.addEventListener('DOMContentLoaded', function() {
-        const usernameField = document.getElementById('{{ form.username.id_for_label }}');
-        const password1Field = document.getElementById('{{ form.password1.id_for_label }}');
-        const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
-        const form = document.getElementById('registration-form');
-
-        // Проверка логина при потере фокуса
-        usernameField.addEventListener('blur', checkUsernameAvailability);
-
-        // Проверка пароля при вводе
-        password1Field.addEventListener('input', checkPasswordStrength);
-
-        // Проверка совпадения паролей при вводе
-        password2Field.addEventListener('input', checkPasswordMatch);
-
-        // Валидация перед отправкой формы
-        form.addEventListener('submit', function(e) {
-            const isUsernameValid = checkUsernameAvailability();
-            const isPasswordValid = checkPasswordStrength();
-            const isPasswordMatch = checkPasswordMatch();
-
-            if (!isUsernameValid || !isPasswordValid || !isPasswordMatch) {
-                e.preventDefault();
-            }
         });
-    });
-</script>
+    </script>
+
+    <style>
+        /* Основные стили из главной страницы */
+        :root {
+            /* Светлая тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+            --bg-color-1: #FFE8E7;
+            --bg-color-2: #F6E8FF;
+            --bg-accent: #e0e7ff;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --error-color: #ef4444;
+            --success-color: #10b981;
+        }
+
+        [data-theme="dark"] {
+            /* Тёмная тема */
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(31, 41, 55, 0.3);
+            --glass-border: rgba(55, 65, 81, 0.4);
+            --text-dark: #f3f4f6;
+            --text-light: #1f2937;
+            --card-bg: rgba(31, 41, 55, 0.9);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --bg-color-1: #391C3A;
+            --bg-color-2: #312741;
+            --bg-accent: #1f2937;
+            --input-bg: rgba(31, 41, 55, 0.8);
+            --error-color: #f87171;
+            --success-color: #34d399;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-1), var(--bg-color-2));
+            background-size: 400% 400%;
+            z-index: -2;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Переключатель темы */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sun-moon {
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .sun {
+            display: none;
+        }
+
+        [data-theme="light"] .moon {
+            display: none;
+        }
+
+        /* Основной контент */
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .glass-container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        /* Стили формы регистрации */
+        .auth-container {
+            text-align: center;
+        }
+
+        .auth-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+
+        .form-input.is-invalid {
+            border-color: var(--error-color);
+        }
+
+        .form-input.is-valid {
+            border-color: var(--success-color);
+        }
+
+        .invalid-feedback {
+            color: var(--error-color);
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .password-input {
+            position: relative;
+            display: flex;
+        }
+
+        .password-input .form-input {
+            flex: 1;
+            padding-right: 3rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .auth-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .auth-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .auth-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .auth-links span {
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+
+        .auth-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .glass-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .auth-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-title {
+                font-size: 1.6rem;
+            }
+
+            .auth-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+        }
+    </style>
 {% endblock %}
