@@ -28,7 +28,7 @@
                 <div class="form-group">
                     <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
                     {{ form.username|add_class:"form-input" }}
-                    <div class="invalid-feedback" id="username-error"></div>
+                    <div class="invalid-feedback" id="username-error" style="display: none;"></div>
                     {{ form.username.errors }}
                 </div>
 
@@ -44,14 +44,14 @@
                     <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
                     <div class="password-input">
                         {{ form.password1|add_class:"form-input" }}
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}')">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <button type="button" class="toggle-password" data-target="{{ form.password1.id_for_label }}">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" id="eye-icon-{{ form.password1.id_for_label }}">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                         </button>
                     </div>
-                    <div class="invalid-feedback" id="password-error"></div>
+                    <div class="invalid-feedback" id="password-error" style="display: none;"></div>
                     {{ form.password1.errors }}
                 </div>
 
@@ -60,14 +60,14 @@
                     <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
                     <div class="password-input">
                         {{ form.password2|add_class:"form-input" }}
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}')">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <button type="button" class="toggle-password" data-target="{{ form.password2.id_for_label }}">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" id="eye-icon-{{ form.password2.id_for_label }}">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                         </button>
                     </div>
-                    <div class="invalid-feedback" id="password2-error"></div>
+                    <div class="invalid-feedback" id="password2-error" style="display: none;"></div>
                     {{ form.password2.errors }}
                 </div>
 
@@ -97,44 +97,52 @@
         // Функция для переключения видимости пароля
         function togglePasswordVisibility(fieldId) {
             const passwordField = document.getElementById(fieldId);
-            const icon = document.querySelector(`#${fieldId} + .toggle-password svg`);
+            const eyeIcon = document.getElementById(`eye-icon-${fieldId}`);
 
             if (passwordField.type === "password") {
                 passwordField.type = "text";
-                icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+                eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
             } else {
                 passwordField.type = "password";
-                icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+                eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
             }
         }
 
-        // Проверка доступности логина через AJAX
-        function checkUsernameAvailability() {
+        // Запрещенные логины
+        const FORBIDDEN_USERNAMES = ['admin', 'administrator', 'root', 'moderator', 'support', 'superuser'];
+
+        // Распространенные пароли
+        const COMMON_PASSWORDS = [
+            '123456', 'password', '12345678', 'qwerty', '123456789',
+            '12345', '1234', '111111', '1234567', 'dragon',
+            '123123', 'baseball', 'abc123', 'football', 'monkey'
+        ];
+
+        // Проверка запрещенных логинов
+        function checkForbiddenUsernames() {
             const usernameField = document.getElementById('{{ form.username.id_for_label }}');
-            const username = usernameField.value.trim();
+            const username = usernameField.value.trim().toLowerCase();
             const usernameError = document.getElementById('username-error');
 
-            if (username.length < 3) {
+            const isForbidden = FORBIDDEN_USERNAMES.some(word => username.includes(word));
+
+            if (isForbidden) {
+                usernameField.classList.add('is-invalid');
+                usernameError.textContent = 'Этот логин запрещен для использования';
+                usernameError.style.display = 'block';
+                return false;
+            }
+
+            // Минимальная длина логина
+            if (username.length > 0 && username.length < 3) {
                 usernameField.classList.add('is-invalid');
                 usernameError.textContent = 'Логин должен содержать минимум 3 символа';
                 usernameError.style.display = 'block';
                 return false;
             }
 
-            fetch('/check_username/?username=' + encodeURIComponent(username))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.exists) {
-                        usernameField.classList.add('is-invalid');
-                        usernameError.textContent = 'Этот логин уже занят';
-                        usernameError.style.display = 'block';
-                    } else {
-                        usernameField.classList.remove('is-invalid');
-                        usernameField.classList.add('is-valid');
-                        usernameError.style.display = 'none';
-                    }
-                });
-
+            usernameField.classList.remove('is-invalid');
+            usernameError.style.display = 'none';
             return true;
         }
 
@@ -144,6 +152,16 @@
             const password = passwordField.value;
             const passwordError = document.getElementById('password-error');
 
+            // Сбрасываем состояние ошибки
+            passwordField.classList.remove('is-invalid', 'is-valid');
+            passwordError.style.display = 'none';
+
+            // Не показываем ошибки для пустого поля
+            if (password.length === 0) {
+                return true;
+            }
+
+            // Проверка на минимальную длину
             if (password.length < 8) {
                 passwordField.classList.add('is-invalid');
                 passwordError.textContent = 'Пароль должен содержать минимум 8 символов';
@@ -151,13 +169,15 @@
                 return false;
             }
 
+            // Проверка на заглавные буквы
             if (!/[A-Z]/.test(password)) {
                 passwordField.classList.add('is-invalid');
-                passwordError.textContent = 'Пароль должен содержать хотя бы одну заглавную латинскую букву';
+                passwordError.textContent = 'Пароль должен содержать хотя бы одну заглавную букву';
                 passwordError.style.display = 'block';
                 return false;
             }
 
+            // Проверка на цифры
             if (!/[0-9]/.test(password)) {
                 passwordField.classList.add('is-invalid');
                 passwordError.textContent = 'Пароль должен содержать хотя бы одну цифру';
@@ -165,9 +185,15 @@
                 return false;
             }
 
-            passwordField.classList.remove('is-invalid');
+            // Проверка на распространенность (только при отправке формы)
+            if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
+                passwordField.classList.add('is-invalid');
+                passwordError.textContent = 'Введённый пароль слишком широко распространён';
+                passwordError.style.display = 'block';
+                return false;
+            }
+
             passwordField.classList.add('is-valid');
-            passwordError.style.display = 'none';
             return true;
         }
 
@@ -197,23 +223,80 @@
             const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
             const form = document.getElementById('registration-form');
 
-            // Проверка логина при потере фокуса
-            usernameField.addEventListener('blur', checkUsernameAvailability);
+            // Обработчики для кнопок переключения видимости пароля
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    togglePasswordVisibility(targetId);
+                });
+            });
 
-            // Проверка пароля при вводе
-            password1Field.addEventListener('input', checkPasswordStrength);
+            // Проверка логина на запрещенные слова при вводе
+            usernameField.addEventListener('input', checkForbiddenUsernames);
+
+            // Проверка пароля при вводе (без проверки на распространенность)
+            password1Field.addEventListener('input', function() {
+                const password = this.value;
+                const passwordError = document.getElementById('password-error');
+
+                // Сбрасываем состояние ошибки
+                this.classList.remove('is-invalid', 'is-valid');
+                passwordError.style.display = 'none';
+
+                if (password.length === 0) return;
+
+                if (password.length < 8) {
+                    this.classList.add('is-invalid');
+                    passwordError.textContent = 'Пароль должен содержать минимум 8 символов';
+                    passwordError.style.display = 'block';
+                } else if (!/[A-Z]/.test(password)) {
+                    this.classList.add('is-invalid');
+                    passwordError.textContent = 'Пароль должен содержать хотя бы одну заглавную букву';
+                    passwordError.style.display = 'block';
+                } else if (!/[0-9]/.test(password)) {
+                    this.classList.add('is-invalid');
+                    passwordError.textContent = 'Пароль должен содержать хотя бы одну цифру';
+                    passwordError.style.display = 'block';
+                } else {
+                    this.classList.add('is-valid');
+                }
+            });
 
             // Проверка совпадения паролей при вводе
             password2Field.addEventListener('input', checkPasswordMatch);
 
             // Валидация перед отправкой формы
-            form.addEventListener('submit', function(e) {
-                const isUsernameValid = checkUsernameAvailability();
-                const isPasswordValid = checkPasswordStrength();
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const isUsernameValid = checkForbiddenUsernames();
+                const isPasswordValid = checkPasswordStrength(); // Теперь включает проверку на распространенность
                 const isPasswordMatch = checkPasswordMatch();
 
                 if (!isUsernameValid || !isPasswordValid || !isPasswordMatch) {
-                    e.preventDefault();
+                    return;
+                }
+
+                // Проверка существования пользователя только при отправке формы
+                const username = usernameField.value.trim();
+                const usernameError = document.getElementById('username-error');
+
+                try {
+                    const response = await fetch('/check_username/?username=' + encodeURIComponent(username));
+                    const data = await response.json();
+
+                    if (data.exists) {
+                        usernameField.classList.add('is-invalid');
+                        usernameError.textContent = 'Этот логин уже занят';
+                        usernameError.style.display = 'block';
+                        return;
+                    }
+
+                    // Если все проверки пройдены, отправляем форму
+                    form.submit();
+                } catch (error) {
+                    console.error('Ошибка при проверке имени пользователя:', error);
+                    form.submit();
                 }
             });
         });
