@@ -108,6 +108,37 @@
             }
         }
 
+                    // Получаем поле email
+        const emailField = document.getElementById('{{ form.email.id_for_label }}');
+
+        // Создаем элемент для отображения ошибки
+        const emailError = document.createElement('div');
+        emailError.className = 'invalid-feedback';
+        emailField.parentNode.appendChild(emailError);
+
+        // Обработчик ввода email
+        emailField.addEventListener('input', function() {
+            const email = this.value.trim();
+
+            // Сбрасываем состояние ошибки
+            this.classList.remove('is-invalid');
+            emailError.style.display = 'none';
+
+            // Не проверяем пустые значения
+            if (!email) return;
+
+            // Проверяем email на сервере
+            fetch(`/check_email/?email=${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        this.classList.add('is-invalid');
+                        emailError.textContent = 'Этот email уже зарегистрирован';
+                        emailError.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+        });
         // Запрещенные логины
         const FORBIDDEN_USERNAMES = ['admin', 'administrator', 'root', 'moderator', 'support', 'superuser'];
 
