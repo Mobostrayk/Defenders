@@ -27,15 +27,34 @@
             --top-bar-bg: #FFFFFF; /* Фон верхней панели */
             --top-bar-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); /* Тень панели */
         }
+                  /* Кнопка переключения темы */
+.theme-toggle {
+position: fixed;
+top: 1.5rem;
+right: 1.5rem;
+width: 2.5rem;
+height: 2.5rem;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.7); /* Полупрозрачный белый фон */
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.9); /* Светлая граница */
+color: var(--text-dark); /* Цвет иконки из текущей темы */
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 100;
+transition: all 0.3s ease;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для контраста */
+}
 
-        /* Тёмная тема */
-        [data-theme="dark"] {
-            --dark: #f3f4f6;
-            --light: #1f2937;
-            --gray: #9CA3AF;
-            --top-bar-bg: #1f2937;
-            --top-bar-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-        }
+/* Стили для тёмной темы */
+[data-theme="dark"] .theme-toggle {
+background: rgba(255, 255, 255, 0.1); /* Полупрозрачный фон */
+border: 1px solid rgba(255, 255, 255, 0.2); /* Светлая граница */
+color: #fff; /* Белая иконка */
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Более тёмная тень */
+}
 
         /* Базовые стили для всех элементов */
         * {
@@ -197,7 +216,7 @@
         <div class="nav-container">
             <!-- Левые ссылки -->
             <div class="left-links">
-                <a href="#" class="nav-link">Главная</a>
+                <a href="{% url 'index' %}" class="nav-link">Главная</a>
                 <a href="{% url 'profile' %}" class="nav-link">Профиль</a>
                 <a href="#" class="nav-link">Отзывы</a>
             </div>

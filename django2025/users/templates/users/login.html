@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load form_tags %}
+
 {% block title %}Авторизация{% endblock %}
 
 {% block content %}
@@ -19,25 +20,32 @@
         <div class="glass-container auth-container">
             <h1 class="auth-title">Авторизация</h1>
 
-            <form method="post" class="auth-form">
+            <form method="post" id="login-form" class="auth-form">
                 {% csrf_token %}
+                {{ form.non_field_errors }}
 
+                <!-- Поле username -->
                 <div class="form-group">
                     <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
                     {{ form.username|add_class:"form-input" }}
+                    <div class="invalid-feedback" id="username-error" style="display: none;"></div>
+                    {{ form.username.errors }}
                 </div>
 
+                <!-- Поле password -->
                 <div class="form-group">
                     <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
                     <div class="password-input">
                         {{ form.password|add_class:"form-input" }}
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('{{ form.password.id_for_label }}')">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <button type="button" class="toggle-password" data-target="{{ form.password.id_for_label }}">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" id="eye-icon-{{ form.password.id_for_label }}">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                         </button>
                     </div>
+                    <div class="invalid-feedback" id="password-error" style="display: none;"></div>
+                    {{ form.password.errors }}
                 </div>
 
                 <button type="submit" class="auth-btn">Войти</button>
@@ -64,19 +72,71 @@
             localStorage.setItem('theme', newTheme);
         });
 
-        // Переключение видимости пароля
+        // Функция для переключения видимости пароля
         function togglePasswordVisibility(fieldId) {
             const passwordField = document.getElementById(fieldId);
-            const icon = document.querySelector(`#${fieldId} + .toggle-password svg`);
+            const eyeIcon = document.getElementById(`eye-icon-${fieldId}`);
 
             if (passwordField.type === "password") {
                 passwordField.type = "text";
-                icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+                eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
             } else {
                 passwordField.type = "password";
-                icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+                eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
             }
         }
+
+        // Инициализация обработчиков событий
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчики для кнопок переключения видимости пароля
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    togglePasswordVisibility(targetId);
+                });
+            });
+
+            // Валидация формы авторизации
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+                    const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+                    let isValid = true;
+
+                    // Сброс ошибок
+                    usernameField.classList.remove('is-invalid');
+                    passwordField.classList.remove('is-invalid');
+                    document.getElementById('username-error').style.display = 'none';
+                    document.getElementById('password-error').style.display = 'none';
+
+                    // Проверка имени пользователя
+                    if (!usernameField.value.trim()) {
+                        usernameField.classList.add('is-invalid');
+                        document.getElementById('username-error').textContent = 'Введите имя пользователя';
+                        document.getElementById('username-error').style.display = 'block';
+                        isValid = false;
+                    }
+
+                    // Проверка пароля
+                    if (!passwordField.value) {
+                        passwordField.classList.add('is-invalid');
+                        document.getElementById('password-error').textContent = 'Введите пароль';
+                        document.getElementById('password-error').style.display = 'block';
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        // Прокручиваем к первой ошибке
+                        const firstError = document.querySelector('.is-invalid');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                });
+            }
+        });
     </script>
 
     <style>
@@ -95,6 +155,8 @@
             --bg-color-2: #F6E8FF;
             --bg-accent: #e0e7ff;
             --input-bg: rgba(255, 255, 255, 0.8);
+            --error-color: #ef4444;
+            --success-color: #10b981;
         }
 
         [data-theme="dark"] {
@@ -111,14 +173,21 @@
             --bg-color-2: #312741;
             --bg-accent: #1f2937;
             --input-bg: rgba(31, 41, 55, 0.8);
+            --error-color: #f87171;
+            --success-color: #34d399;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
         }
 
         .background {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
             background: linear-gradient(-45deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-1), var(--bg-color-2));
             background-size: 400% 400%;
             z-index: -2;
@@ -131,25 +200,26 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Переключатель темы */
-        .theme-toggle {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            color: var(--text-dark);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
+                          /* Кнопка переключения темы */
+.theme-toggle {
+position: fixed;
+top: 1.5rem;
+right: 1.5rem;
+width: 2.5rem;
+height: 2.5rem;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.7); /* Полупрозрачный белый фон */
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.9); /* Светлая граница */
+color: var(--text-dark); /* Цвет иконки из текущей темы */
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 100;
+transition: all 0.3s ease;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для контраста */
+}
 
         .theme-toggle:hover {
             transform: scale(1.1);
@@ -230,6 +300,8 @@
             color: var(--text-dark);
             transition: all 0.3s ease;
             backdrop-filter: blur(5px);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .form-input:focus {
@@ -238,14 +310,31 @@
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
         }
 
+        .form-input.is-invalid {
+            border-color: var(--error-color);
+        }
+
+        .form-input.is-valid {
+            border-color: var(--success-color);
+        }
+
+        .invalid-feedback {
+            color: var(--error-color);
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
         .password-input {
             position: relative;
             display: flex;
+            width: 100%;
         }
 
         .password-input .form-input {
             flex: 1;
             padding-right: 3rem;
+            width: 100%;
         }
 
         .toggle-password {
@@ -279,6 +368,7 @@
             transition: all 0.3s ease;
             margin-top: 0.5rem;
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            width: 100%;
         }
 
         .auth-btn:hover {
@@ -290,15 +380,21 @@
         .auth-links {
             display: flex;
             justify-content: center;
-            gap: 1rem;
+            align-items: center;
+            gap: 0.5rem;
             margin-top: 1.5rem;
             flex-wrap: wrap;
+        }
+
+        .auth-links span {
+            color: var(--text-dark);
+            opacity: 0.8;
         }
 
         .auth-link {
             color: var(--primary);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-weight: 500;
             transition: all 0.3s ease;
         }
 
@@ -330,10 +426,6 @@
             .auth-links {
                 flex-direction: column;
                 gap: 0.5rem;
-            }
-
-            .auth-divider {
-                display: none;
             }
 
             .theme-toggle {

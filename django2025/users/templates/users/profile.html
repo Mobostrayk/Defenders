@@ -150,37 +150,50 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Переключатель темы (как на главной) */
-        .theme-toggle {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            color: var(--text-dark);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
+                  /* Кнопка переключения темы */
+.theme-toggle {
+position: fixed;
+top: 1.5rem;
+right: 1.5rem;
+width: 2.5rem;
+height: 2.5rem;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.7); /* Полупрозрачный белый фон */
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.9); /* Светлая граница */
+color: var(--text-dark); /* Цвет иконки из текущей темы */
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 100;
+transition: all 0.3s ease;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для контраста */
+}
 
-        .theme-toggle:hover {
-            transform: scale(1.1);
-        }
+/* Стили для тёмной темы */
+[data-theme="dark"] .theme-toggle {
+background: rgba(255, 255, 255, 0.1); /* Полупрозрачный фон */
+border: 1px solid rgba(255, 255, 255, 0.2); /* Светлая граница */
+color: #fff; /* Белая иконка */
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Более тёмная тень */
+}
+
+
+
+
+      .theme-toggle:hover {
+transform: scale(1.1);
+background: rgba(255, 255, 255, 0.9); /* Подсветка при наведении */
+}
 
         .sun-moon {
             transition: transform 0.3s ease;
         }
 
-        [data-theme="dark"] .sun {
-            display: none;
-        }
+        [data-theme="dark"] .theme-toggle:hover {
+background: rgba(255, 255, 255, 0.2); /* Подсветка в тёмной теме */
+}
 
         [data-theme="light"] .moon {
             display: none;
