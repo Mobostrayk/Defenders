@@ -63,12 +63,15 @@
 
             <!-- Кнопки действий -->
             <div class="profile-actions">
-                <a href="{% url 'index' %}" class="action-btn primary-btn">
-                    <span>На главную</span>
-                </a>
-                <a href="{% url 'logout' %}" class="action-btn secondary-btn">
-                    <span>Выйти</span>
-                </a>
+            <a href="{% url 'track_habits' %}" class="action-btn primary-btn">
+                <span>Отслеживать привычки</span>
+            </a>
+            <a href="{% url 'index' %}" class="action-btn secondary-btn">
+                <span>На главную</span>
+            </a>
+            <a href="{% url 'logout' %}" class="action-btn secondary-btn">
+                <span>Выйти</span>
+            </a>
             </div>
         </div>
     </main>

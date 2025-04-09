@@ -20,6 +20,13 @@ from .forms import RegisterForm, LoginForm, VerificationForm
 from .models import User, Profile, EmailVerification
 import json
 from django.views.decorators.http import require_POST
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
+from .models import UserHabit, HabitCompletion
+from .forms import HabitSettingsForm
 
 
 def registration(request):
@@ -164,5 +171,139 @@ def check_username(request):
     exists = User.objects.filter(username__iexact=username).exists()
     return JsonResponse({'exists': exists})
 
+
+@login_required
+def track_habits(request):
+    today = timezone.now().date()
+    user_habits = UserHabit.objects.filter(user=request.user).select_related('habit')
+
+    # Получаем привычки для сегодня
+    today_habits = []
+    for user_habit in user_habits:
+        if today.weekday() in user_habit.get_selected_days():
+            completion, created = HabitCompletion.objects.get_or_create(
+                user_habit=user_habit,
+                date=today,
+                defaults={'completed': False}
+            )
+            today_habits.append({
+                'user_habit': user_habit,
+                'completion': completion
+            })
+
+    # Получаем историю за последние 7 дней
+    history = []
+    for i in range(7):
+        date = today - timedelta(days=i)
+        habits_for_day = []
+        for user_habit in user_habits:
+            if date.weekday() in user_habit.get_selected_days():
+                try:
+                    completion = HabitCompletion.objects.get(user_habit=user_habit, date=date)
+                    habits_for_day.append({
+                        'habit': user_habit.habit.name,
+                        'completed': completion.completed
+                    })
+                except HabitCompletion.DoesNotExist:
+                    habits_for_day.append({
+                        'habit': user_habit.habit.name,
+                        'completed': False
+                    })
+        history.append({
+            'date': date,
+            'habits': habits_for_day
+        })
+
+    return render(request, 'users/track_habits.html', {
+        'today_habits': today_habits,
+        'history': history
+    })
+
+
+@login_required
+def update_habit_completion(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        habit_id = data.get('habit_id')
+        date_str = data.get('date')
+        completed = data.get('completed')
+
+        try:
+            date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
+            user_habit = UserHabit.objects.get(id=habit_id, user=request.user)
+
+            # Проверяем, что дата не более чем на 1 день в будущем
+            today = timezone.now().date()
+            if date > today + timedelta(days=1):
+                return JsonResponse(
+                    {'status': 'error', 'message': 'Нельзя отмечать привычки более чем на 1 день вперед'})
+
+            # Обновляем или создаем запись
+            completion, created = HabitCompletion.objects.get_or_create(
+                user_habit=user_habit,
+                date=date,
+                defaults={'completed': completed}
+            )
+            if not created:
+                completion.completed = completed
+                completion.save()
+
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+@login_required
+def habit_settings(request, habit_id):
+    user_habit = get_object_or_404(UserHabit, id=habit_id, user=request.user)
+
+    if request.method == 'POST':
+        form = HabitSettingsForm(request.POST, instance=user_habit)
+        if form.is_valid():
+            form.save()
+            return redirect('track_habits')
+    else:
+        form = HabitSettingsForm(instance=user_habit)
+
+    return render(request, 'users/habit_settings.html', {
+        'form': form,
+        'habit': user_habit.habit
+    })
+
+
+@login_required
+def habit_stats(request, habit_id):
+    user_habit = get_object_or_404(UserHabit, id=habit_id, user=request.user)
+    today = timezone.now().date()
+
+    # Получаем все выполнения привычки
+    completions = HabitCompletion.objects.filter(
+        user_habit=user_habit,
+        date__lte=today
+    ).order_by('-date')
+
+    # Подсчет статистики
+    total_days = completions.count()
+    completed_days = completions.filter(completed=True).count()
+    completion_percentage = round((completed_days / total_days) * 100) if total_days > 0 else 0
+
+    # Подсчет текущей серии
+    current_streak = 0
+    for completion in completions:
+        if completion.completed:
+            current_streak += 1
+        else:
+            break
+
+    return render(request, 'users/habit_stats.html', {
+        'user_habit': user_habit,
+        'total_days': total_days,
+        'completed_days': completed_days,
+        'current_streak': current_streak,
+        'completion_percentage': completion_percentage,
+        'completions': completions[:30]  # Последние 30 дней
+    })
 
 

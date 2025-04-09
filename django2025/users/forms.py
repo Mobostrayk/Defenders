@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from .models import UserHabit
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -29,3 +30,17 @@ class VerificationForm(forms.Form):
             'placeholder': 'Введите код из письма'
         })
     )
+
+class HabitSettingsForm(forms.ModelForm):
+    class Meta:
+        model = UserHabit
+        fields = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        widgets = {
+            'monday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'tuesday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'wednesday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'thursday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'friday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'saturday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sunday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }

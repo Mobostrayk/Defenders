@@ -1,0 +1,201 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}HHabits - Статистика привычки{% endblock %}
+
+{% block content %}
+    <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
+
+    <main class="main-content">
+        <div class="glass-container">
+            <h1 class="stats-title">Статистика: {{ user_habit.habit.name }}</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ completed_days }}</div>
+                    <div class="stat-label">Дней выполнено</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_days }}</div>
+                    <div class="stat-label">Всего дней</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ current_streak }}</div>
+                    <div class="stat-label">Текущая серия</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ completion_percentage }}%</div>
+                    <div class="stat-label">Процент выполнения</div>
+                </div>
+            </div>
+            
+            <div class="calendar-section">
+                <h3>Последние 30 дней</h3>
+                <div class="calendar-grid">
+                    {% for completion in completions %}
+                        <div class="calendar-day {% if completion.completed %}completed{% endif %}" 
+                             title="{{ completion.date|date:'d.m.Y' }} - {% if completion.completed %}Выполнено{% else %}Не выполнено{% endif %}">
+                            {{ completion.date|date:"d" }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <span class="legend-color completed"></span>
+                        <span class="legend-text">Выполнено</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color not-completed"></span>
+                        <span class="legend-text">Не выполнено</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="back-link">
+                <a href="{% url 'track_habits' %}" class="back-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Назад к трекеру
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .stats-title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+        
+        .calendar-section {
+            margin-bottom: 2rem;
+        }
+        
+        .calendar-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 30px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .calendar-day.completed {
+            background: var(--success);
+            color: white;
+        }
+        
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        
+        .legend-color.completed {
+            background: var(--success);
+        }
+        
+        .legend-color.not-completed {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            color: var(--primary-hover);
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-title {
+                font-size: 1.5rem;
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+{% endblock %}

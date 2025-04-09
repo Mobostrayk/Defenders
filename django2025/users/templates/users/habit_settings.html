@@ -1,0 +1,165 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}HHabits - Настройки привычки{% endblock %}
+
+{% block content %}
+    <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
+
+    <main class="main-content">
+        <div class="glass-container">
+            <h1 class="settings-title">Настройки привычки: {{ habit.name }}</h1>
+            
+            <form method="post" class="habit-settings-form">
+                {% csrf_token %}
+                
+                <div class="days-selection">
+                    <h3>Выберите дни для выполнения:</h3>
+                    <div class="days-grid">
+                        <label class="day-checkbox">
+                            {{ form.monday }}
+                            <span class="day-label">Понедельник</span>
+                        </label>
+                        <label class="day-checkbox">
+                            {{ form.tuesday }}
+                            <span class="day-label">Вторник</span>
+                        </label>
+                        <label class="day-checkbox">
+                            {{ form.wednesday }}
+                            <span class="day-label">Среда</span>
+                        </label>
+                        <label class="day-checkbox">
+                            {{ form.thursday }}
+                            <span class="day-label">Четверг</span>
+                        </label>
+                        <label class="day-checkbox">
+                            {{ form.friday }}
+                            <span class="day-label">Пятница</span>
+                        </label>
+                        <label class="day-checkbox">
+                            {{ form.saturday }}
+                            <span class="day-label">Суббота</span>
+                        </label>
+                        <label class="day-checkbox">
+                            {{ form.sunday }}
+                            <span class="day-label">Воскресенье</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">Сохранить изменения</button>
+                    <a href="{% url 'track_habits' %}" class="cancel-btn">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <style>
+        .settings-title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        .habit-settings-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .days-selection {
+            margin-bottom: 2rem;
+        }
+        
+        .days-selection h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .day-checkbox:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .day-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+        
+        .day-label {
+            font-weight: 500;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .save-btn {
+            padding: 0.8rem 1.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .cancel-btn {
+            padding: 0.8rem 1.8rem;
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .cancel-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        @media (max-width: 480px) {
+            .days-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+{% endblock %}

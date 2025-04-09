@@ -1,0 +1,320 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}HHabits - Отслеживание привычек{% endblock %}
+
+{% block content %}
+    <div class="background"></div>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+        <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+            <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+            <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+        </svg>
+    </button>
+
+    <main class="main-content">
+        <div class="glass-container">
+            <h1 class="tracking-title">Отслеживание привычек</h1>
+            
+            <!-- Сегодняшние привычки -->
+            <div class="today-habits">
+                <h2>Сегодня - {{ today|date:"d.m.Y" }}</h2>
+                {% if today_habits %}
+                    <div class="habits-list">
+                        {% for habit in today_habits %}
+                            <div class="habit-item {% if habit.completion.completed %}completed{% endif %}" 
+                                 data-habit-id="{{ habit.user_habit.id }}">
+                                <label class="habit-checkbox">
+                                    <input type="checkbox" {% if habit.completion.completed %}checked{% endif %}>
+                                    <span class="checkmark"></span>
+                                    {{ habit.user_habit.habit.name }}
+                                </label>
+                                <div class="habit-actions">
+                                    <a href="{% url 'habit_settings' habit.user_habit.id %}" class="settings-btn" title="Настройки">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                        </svg>
+                                    </a>
+                                    <a href="{% url 'habit_stats' habit.user_habit.id %}" class="stats-btn" title="Статистика">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M3 3v18h18" />
+                                            <path d="M18 17V9" />
+                                            <path d="M13 17V5" />
+                                            <path d="M8 17v-3" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-habits">Сегодня нет привычек для выполнения</p>
+                {% endif %}
+            </div>
+            
+            <!-- История за неделю -->
+            <div class="history-section">
+                <h2>История за неделю</h2>
+                <div class="history-grid">
+                    {% for day in history %}
+                        <div class="history-day {% if forloop.first %}today{% endif %}">
+                            <div class="day-header">
+                                {{ day.date|date:"D" }}<br>
+                                {{ day.date|date:"d.m" }}
+                            </div>
+                            <div class="day-habits">
+                                {% for habit in day.habits %}
+                                    <div class="day-habit {% if habit.completed %}completed{% endif %}" 
+                                         title="{{ habit.habit }} - {% if habit.completed %}Выполнено{% else %}Не выполнено{% endif %}"></div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Завтрашние привычки -->
+            <div class="tomorrow-habits">
+                <h2>Завтра</h2>
+                {% if tomorrow_habits %}
+                    <div class="habits-list">
+                        {% for habit in tomorrow_habits %}
+                            <div class="habit-item {% if habit.completion.completed %}completed{% endif %}" 
+                                 data-habit-id="{{ habit.user_habit.id }}">
+                                <label class="habit-checkbox">
+                                    <input type="checkbox" {% if habit.completion.completed %}checked{% endif %}>
+                                    <span class="checkmark"></span>
+                                    {{ habit.user_habit.habit.name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-habits">Завтра нет привычек для выполнения</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработка кликов по чекбоксам
+            document.querySelectorAll('.habit-checkbox input').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const habitItem = this.closest('.habit-item');
+                    const habitId = habitItem.dataset.habitId;
+                    const completed = this.checked;
+                    const today = new Date().toISOString().split('T')[0];
+                    
+                    fetch("{% url 'update_habit_completion' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            habit_id: habitId,
+                            date: today,
+                            completed: completed
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            habitItem.classList.toggle('completed', completed);
+                        } else {
+                            this.checked = !completed;
+                            alert(data.message || 'Ошибка при обновлении');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --glass: rgba(31, 41, 55, 0.3);
+            --glass-border: rgba(55, 65, 81, 0.4);
+            --text-dark: #f3f4f6;
+            --text-light: #1f2937;
+            --card-bg: rgba(31, 41, 55, 0.9);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .tracking-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        
+        .today-habits, .tomorrow-habits, .history-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .habits-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .habit-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .habit-item.completed {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .habit-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+        
+        .habit-checkbox input {
+            display: none;
+        }
+        
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .habit-checkbox input:checked ~ .checkmark {
+            background-color: var(--primary);
+        }
+        
+        .habit-checkbox input:checked ~ .checkmark:after {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .habit-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+        
+        .settings-btn, .stats-btn {
+            color: var(--text-dark);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        
+        .settings-btn:hover, .stats-btn:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+        
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .history-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .history-day.today {
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .day-header {
+            font-size: 0.8rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .day-habits {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            width: 100%;
+        }
+        
+        .day-habit {
+            height: 4px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+        }
+        
+        .day-habit.completed {
+            background: var(--success);
+        }
+        
+        .no-habits {
+            color: var(--text-dark);
+            opacity: 0.7;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .history-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .history-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tracking-title {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+{% endblock %}

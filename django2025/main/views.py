@@ -6,9 +6,6 @@ from users.models import Habit, UserHabit
 import random
 
 
-# def index(request):
-#     return render(request,'main/index.html')
-
 def about(request):
     return render(request,'main/about.html')
 
@@ -42,9 +39,36 @@ def index(request):
     })
 
 
-@login_required(login_url='login')  # Перенаправление на страницу входа
+@login_required(login_url='login')
 def save_habit(request, habit_id):
     habit = get_object_or_404(Habit, id=habit_id)
-    UserHabit.objects.get_or_create(user=request.user, habit=habit)
+    user_habit, created = UserHabit.objects.get_or_create(user=request.user, habit=habit)
+
+    # Если привычка новая, устанавливаем дни по умолчанию
+    if created:
+        if habit.is_fixed:
+            # Все дни для фиксированных привычек
+            user_habit.monday = True
+            user_habit.tuesday = True
+            user_habit.wednesday = True
+            user_habit.thursday = True
+            user_habit.friday = True
+            user_habit.saturday = True
+            user_habit.sunday = True
+        elif habit.weekend_only:
+            # Только выходные
+            user_habit.saturday = True
+            user_habit.sunday = True
+        else:
+            # По умолчанию - все дни
+            user_habit.monday = True
+            user_habit.tuesday = True
+            user_habit.wednesday = True
+            user_habit.thursday = True
+            user_habit.friday = True
+            user_habit.saturday = True
+            user_habit.sunday = True
+        user_habit.save()
+
     messages.success(request, f'Привычка "{habit.name}" сохранена!')
     return redirect('index')
