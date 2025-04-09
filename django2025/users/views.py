@@ -287,7 +287,6 @@ def habit_stats(request, habit_id):
     # Подсчет статистики
     total_days = completions.count()
     completed_days = completions.filter(completed=True).count()
-    completion_percentage = round((completed_days / total_days) * 100) if total_days > 0 else 0
 
     # Подсчет текущей серии
     current_streak = 0
@@ -302,7 +301,6 @@ def habit_stats(request, habit_id):
         'total_days': total_days,
         'completed_days': completed_days,
         'current_streak': current_streak,
-        'completion_percentage': completion_percentage,
         'completions': completions[:30]  # Последние 30 дней
     })
 

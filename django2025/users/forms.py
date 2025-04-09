@@ -44,3 +44,8 @@ class HabitSettingsForm(forms.ModelForm):
             'saturday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'sunday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+class HabitDaysForm(forms.ModelForm):
+    class Meta:
+        model = UserHabit
+        fields = ['monday', 'tuesday', 'wednesday', 'thursday',
+                 'friday', 'saturday', 'sunday']

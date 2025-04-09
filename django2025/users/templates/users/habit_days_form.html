@@ -1,0 +1,66 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Выберите дни для привычки: {{ habit.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="days-grid">
+            {% for field in form %}
+            <div class="day-checkbox">
+                {{ field }}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn">Сохранить</button>
+    </form>
+</div>
+
+<style>
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+.day-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+  /* Стили для профиля */
+.habit-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.habit-meta {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
+    font-size: 0.9em;
+    color: #666;
+}
+.habit-actions {
+    display: flex;
+    gap: 10px;
+}
+.btn {
+    padding: 5px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-primary {
+    background: #8b5cf6;
+    color: white;
+}
+.btn-secondary {
+    border: 1px solid #8b5cf6;
+    color: #8b5cf6;
+}
+</style>
+{% endblock %}

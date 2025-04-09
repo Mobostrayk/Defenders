@@ -84,3 +84,4 @@ class EmailVerification(models.Model):
             code=str(uuid.uuid4())[:6].upper(),
             expires_at=timezone.now() + timezone.timedelta(hours=1),
         )
+
