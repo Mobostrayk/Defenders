@@ -1,0 +1,230 @@
+/* Основные переменные цветов и шрифтов */
+:root {
+    --dark: #2D3436;           /* Основной темный цвет текста */
+    --darker: #1E1E1E;         /* Более темный оттенок */
+    --primary: #8b5cf6;        /* Основной акцентный цвет */
+    --primary-hover: #7c3aed;  /* Цвет акцента при наведении */
+    --light: #FFFFFF;          /* Светлый фон */
+    --lighter: #F5F6FA;        /* Светло-серый фон */
+    --gray: #636E72;           /* Серый цвет для второстепенного текста */
+    --gray-light: #E0E0E0;     /* Светло-серый для границ */
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Плавные переходы */
+    --font-main: 'Manrope', sans-serif; /* Основной шрифт */
+    --font-heading: 'Montserrat', sans-serif; /* Шрифт для заголовков */
+    --top-bar-bg: #FFFFFF;     /* Фон верхней панели */
+    --top-bar-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); /* Тень панели */
+    --text-color: var(--dark); /* Цвет текста */
+    --bg-color: var(--lighter); /* Цвет фона */
+    --nav-bg: var(--top-bar-bg); /* Фон навигации */
+}
+
+/* Темная тема */
+[data-theme="dark"] {
+    --dark: #E0E0E0;          /* Светлый текст в темной теме */
+    --darker: #121212;        /* Очень темный фон */
+    --primary: #9f7aea;       /* Более светлый акцент для темной темы */
+    --primary-hover: #8b5cf6; 
+    --gray: #A0AEC0;          /* Серый текст */
+    --gray-light: #2D3748;    /* Темно-серый для границ */
+    --text-color: var(--dark);
+    --bg-color: var(--darker);
+    --nav-bg: #1A1A1A;
+    --top-bar-bg: #1A1A1A;
+    --top-bar-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Базовые стили для всех элементов */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Стили для body */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    font-family: var(--font-main);
+    line-height: 1.6;
+}
+
+/* Стили для верхней панели */
+.top-bar {
+    background-color: var(--nav-bg);
+    color: var(--text-color);
+    box-shadow: var(--top-bar-shadow);
+    padding: 1.2rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Контейнер для содержимого панели */
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+}
+
+/* Стили для ссылок */
+.left-links {
+    display: flex;
+    gap: 2.5rem;
+    flex: 1;
+}
+
+.right-links {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.nav-link {
+    color: var(--gray);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+/* Специальные стили для кнопки FAQ */
+.faq-link {
+    background-color: var(--primary);
+    color: white !important;
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+    transition: var(--transition);
+    margin-left: 1rem;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+}
+
+.faq-link:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+/* Стили для заголовка */
+.title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.title h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-color);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    font-family: var(--font-heading);
+}
+
+/* Кнопка переключения темы - улучшенная версия */
+.theme-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    background: var(--primary);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--primary);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    font-size: 1.2rem;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+/* Стили для темной темы */
+[data-theme="dark"] .theme-toggle {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.1),
+        0 4px 20px rgba(139, 92, 246, 0.6);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: var(--primary-hover);
+    border-color: white;
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.2),
+        0 6px 25px rgba(139, 92, 246, 0.8);
+    animation: pulse 2s infinite;
+}
+
+/* Анимация пульсации для темной темы */
+@keyframes pulse {
+    0% {
+        box-shadow:
+            0 0 0 0 rgba(255, 255, 255, 0.1),
+            0 6px 25px rgba(139, 92, 246, 0.8);
+    }
+    70% {
+        box-shadow:
+            0 0 0 10px rgba(255, 255, 255, 0),
+            0 6px 25px rgba(139, 92, 246, 0.6);
+    }
+    100% {
+        box-shadow:
+            0 0 0 0 rgba(255, 255, 255, 0),
+            0 6px 25px rgba(139, 92, 246, 0.8);
+    }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 480px) {
+    .theme-toggle {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1rem;
+        top: 1rem;
+        right: 1rem;
+    }
+}
+
+    .title h1 {
+        font-size: 1.4rem;
+    }
+
+    .nav-link {
+        font-size: 0.9rem;
+    }
+
+    .theme-toggle {
+        top: 1rem;
+        right: 1rem;
+        width: 2.2rem;
+        height: 2.2rem;
+    }
+}

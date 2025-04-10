@@ -1,54 +1,57 @@
-<!doctype html>
-<html lang="ru">
-<head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <!-- Preconnect to Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Base CSS -->
-    <link rel="stylesheet" href="{% static 'users/css/base.css' %}">
-    {% block extra_css %}{% endblock %}  <!-- For additional CSS files -->
-</head>
-<body>
+<!--<!DOCTYPE html>-->
 
-    <!-- Top navigation bar -->
-    <header class="top-bar">
-        <div class="nav-container">
-            <!-- Left links -->
-            <div class="left-links">
-                 <a href="{% url 'index' %}" class="nav-link">Главная</a>
-                <a href="{% url 'profile' %}" class="nav-link">Профиль</a>
-                <a href="#" class="nav-link">Отзывы</a>
-            </div>
+<!--{% load static %}-->
+<!--{% extends 'main/layout.html' %}-->
 
-            <!-- Centered title -->
-            <div class="title">
-                <h1>Генератор привычек</h1>
-            </div>
+<!--<html lang="ru">-->
+<!--<head>-->
+<!--    {% block extra_css %}-->
+<!--        <link rel="stylesheet" href="{% static 'users/css/head.css' %}">-->
+<!--        <link rel="stylesheet" href="{% static 'users/css/users.css' %}">-->
+<!--        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">-->
+<!--        &lt;!&ndash; Шрифты &ndash;&gt;-->
+<!--        <link rel="preconnect" href="https://fonts.googleapis.com">-->
+<!--        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
+<!--        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+<!--    {% endblock %}-->
 
-            <!-- Right links - FAQ only -->
-            <div class="right-links">
-                <a href="{% url 'about' %}" class="nav-link faq-link">FAQ</a>
-            </div>
-        </div>
-    </header>
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Генератор привычек</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    &lt;!&ndash; Верхняя панель навигации &ndash;&gt;-->
+<!--    <header class="top-bar">-->
+<!--        <div class="nav-container">-->
+<!--            &lt;!&ndash; Левые ссылки &ndash;&gt;-->
+<!--            <div class="left-links">-->
+<!--                <a href="{% url 'index' %}" class="nav-link">Главная</a>-->
+<!--                <a href="{% url 'profile' %}" class="nav-link">Профиль</a>-->
+<!--                <a href="#" class="nav-link">Отзывы</a>-->
+<!--            </div>-->
 
-    <!-- Main content block -->
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+<!--            &lt;!&ndash; Центрированный заголовок &ndash;&gt;-->
+<!--            <div class="title">-->
+<!--                <h1>Генератор привычек</h1>-->
+<!--            </div>-->
 
-    <!-- JavaScript -->
-    <script src="{% static 'users/js/theme.js' %}"></script>
-    {% block extra_js %}{% endblock %}  <!-- For additional JS files -->
-</body>
-</html>
+<!--            &lt;!&ndash; Правая часть - только FAQ &ndash;&gt;-->
+<!--            <div class="right-links">-->
+<!--                <a href="{% url 'about' %}" class="nav-link faq-link">FAQ</a>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </header>-->
+
+<!--    &lt;!&ndash; Основное содержимое &ndash;&gt;-->
+<!--    {% block content %}-->
+<!--    {% endblock %}-->
+
+<!--    <script>-->
+<!--        // Проверяем сохранённую тему при загрузке-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            const savedTheme = localStorage.getItem('theme') || 'light';-->
+<!--            document.documentElement.setAttribute('data-theme', savedTheme);-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
