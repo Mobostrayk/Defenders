@@ -16,9 +16,10 @@
         <div class="glass-container">
             <h1 class="settings-title">Настройки привычки: {{ habit.name }}</h1>
             
+            {% if not user_habit.habit.is_fixed %}
             <form method="post" class="habit-settings-form">
                 {% csrf_token %}
-                
+
                 <div class="days-selection">
                     <h3>Выберите дни для выполнения:</h3>
                     <div class="days-grid">
@@ -52,12 +53,18 @@
                         </label>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="submit" class="save-btn">Сохранить изменения</button>
-                    <a href="{% url 'track_habits' %}" class="cancel-btn">Отмена</a>
+                    <a href="{% url 'profile' %}" class="cancel-btn">Отмена</a>
                 </div>
             </form>
+            {% else %}
+            <div class="fixed-habit-notice">
+                <p>Эта привычка выполняется <strong>каждый день</strong>, настройки дней недоступны.</p>
+                <a href="{% url 'profile' %}" class="back-btn">Вернуться в профиль</a>
+            </div>
+            {% endif %}
         </div>
     </main>
 
@@ -68,27 +75,27 @@
             color: var(--primary);
             text-align: center;
         }
-        
+
         .habit-settings-form {
             max-width: 500px;
             margin: 0 auto;
         }
-        
+
         .days-selection {
             margin-bottom: 2rem;
         }
-        
+
         .days-selection h3 {
             margin-bottom: 1rem;
             color: var(--text-dark);
         }
-        
+
         .days-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
-        
+
         .day-checkbox {
             display: flex;
             align-items: center;
@@ -99,28 +106,28 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .day-checkbox:hover {
             background: rgba(139, 92, 246, 0.1);
         }
-        
+
         .day-checkbox input {
             width: 18px;
             height: 18px;
             accent-color: var(--primary);
         }
-        
+
         .day-label {
             font-weight: 500;
         }
-        
+
         .form-actions {
             display: flex;
             justify-content: center;
             gap: 1rem;
             margin-top: 2rem;
         }
-        
+
         .save-btn {
             padding: 0.8rem 1.8rem;
             background: var(--primary);
@@ -131,12 +138,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .save-btn:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
         }
-        
+
         .cancel-btn {
             padding: 0.8rem 1.8rem;
             background: transparent;
@@ -147,9 +154,39 @@
             text-decoration: none;
             transition: all 0.3s ease;
         }
-        
+
         .cancel-btn:hover {
             background: rgba(139, 92, 246, 0.1);
+        }
+
+        .fixed-habit-notice {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .fixed-habit-notice p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .back-btn {
+            padding: 0.8rem 1.8rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
         }
         
         @media (max-width: 480px) {

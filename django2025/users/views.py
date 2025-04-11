@@ -27,6 +27,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import UserHabit, HabitCompletion
 from .forms import HabitSettingsForm
+import pytz
 
 
 def registration(request):
@@ -172,24 +173,61 @@ def check_username(request):
     return JsonResponse({'exists': exists})
 
 
+
+@login_required
 @login_required
 def track_habits(request):
-    today = timezone.now().date()
-    tomorrow = today + timedelta(days=1)
-    yesterday = today - timedelta(days=1)
+    # Настройка часового пояса
+    tz = pytz.timezone(settings.TIME_ZONE)
 
-    # Обработка навигации по неделям
+    # Обработка параметров даты
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            current_date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            current_date = timezone.now().astimezone(tz).date()
+    else:
+        current_date = timezone.now().astimezone(tz).date()
+
+    # Обработка недельного смещения
     week_offset = int(request.GET.get('week_offset', 0))
-    week_start = today - timedelta(days=today.weekday()) + timedelta(weeks=week_offset)
+    week_start = current_date - timedelta(days=current_date.weekday()) + timedelta(weeks=week_offset)
     week_end = week_start + timedelta(days=6)
 
+    # Получаем привычки пользователя
     user_habits = UserHabit.objects.filter(user=request.user).select_related('habit')
 
-    # Формируем данные для календаря
+    # Привычки для текущей даты
+    habits_for_date = []
+    for user_habit in user_habits:
+        if current_date.weekday() in user_habit.get_selected_days():
+            try:
+                completion = HabitCompletion.objects.get(
+                    user_habit=user_habit,
+                    date=current_date
+                )
+                completed = completion.completed
+            except HabitCompletion.DoesNotExist:
+                completed = False
+
+            # Проверяем просрочку (если дата раньше вчера и не выполнено)
+            yesterday = current_date - timedelta(days=1)
+            overdue = (current_date < yesterday) and not completed
+
+            habits_for_date.append({
+                'id': user_habit.id,
+                'name': user_habit.habit.name,
+                'completed': completed,
+                'overdue': overdue
+            })
+
+    # Формируем данные для недельного календаря
     week_days = []
     for i in range(7):
         day_date = week_start + timedelta(days=i)
         day_habits = []
+        day_completions = []
 
         for user_habit in user_habits:
             if day_date.weekday() in user_habit.get_selected_days():
@@ -198,29 +236,25 @@ def track_habits(request):
                         user_habit=user_habit,
                         date=day_date
                     )
-                    completed = completion.completed
+                    day_completions.append(completion.completed)
                 except HabitCompletion.DoesNotExist:
-                    completed = False
+                    day_completions.append(False)
 
-                # Проверяем просрочку (больше 2 дней назад и не выполнено)
-                overdue = (day_date < today - timedelta(days=1)) and not completed
-
-                day_habits.append({
-                    'id': user_habit.id,
-                    'name': user_habit.habit.name,
-                    'completed': completed,
-                    'overdue': overdue
-                })
+        # Определяем статус дня
+        has_habits = len(day_completions) > 0
+        all_completed = has_habits and all(day_completions)
+        some_completed = has_habits and any(day_completions) and not all_completed
 
         week_days.append({
             'date': day_date,
-            'habits': day_habits
+            'has_habits': has_habits,
+            'all_completed': all_completed,
+            'some_completed': some_completed
         })
 
     return render(request, 'users/track_habits.html', {
-        'today': today,
-        'tomorrow': tomorrow,
-        'yesterday': yesterday,
+        'current_date': current_date,
+        'habits': habits_for_date,
         'week_start': week_start,
         'week_end': week_end,
         'week_days': week_days,
@@ -237,14 +271,30 @@ def update_habit_completion(request):
         completed = data.get('completed')
 
         try:
+            # Получаем текущую дату с учетом часового пояса
+            tz = pytz.timezone(settings.TIME_ZONE)
+            now = timezone.now().astimezone(tz)
+            today = now.date()
+            yesterday = today - timedelta(days=1)
+
             date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
             user_habit = UserHabit.objects.get(id=habit_id, user=request.user)
 
-            # Проверяем, что дата не более чем на 1 день в будущем
-            today = timezone.now().date()
-            if date > today + timedelta(days=1):
+            # Проверяем что дата не в будущем
+            if date > today:
                 return JsonResponse(
-                    {'status': 'error', 'message': 'Нельзя отмечать привычки более чем на 1 день вперед'})
+                    {'status': 'error', 'message': 'Нельзя отмечать привычки за будущие даты'})
+
+            # Проверяем что дата не раньше вчерашнего дня
+            if date < yesterday:
+                return JsonResponse(
+                    {'status': 'error', 'message': 'Можно отмечать привычки только за сегодня или вчера'})
+
+            # Проверяем что привычка должна выполняться в этот день
+            selected_days = user_habit.get_selected_days()
+            if date.weekday() not in selected_days:
+                return JsonResponse(
+                    {'status': 'error', 'message': 'Эта привычка не выполняется в выбранный день'})
 
             # Обновляем или создаем запись
             completion, created = HabitCompletion.objects.get_or_create(
@@ -276,6 +326,7 @@ def habit_settings(request, habit_id):
         form = HabitSettingsForm(instance=user_habit)
 
     return render(request, 'users/habit_settings.html', {
+        'user_habit': user_habit,
         'form': form,
         'habit': user_habit.habit
     })
@@ -284,9 +335,9 @@ def habit_settings(request, habit_id):
 @login_required
 def habit_stats(request, habit_id):
     user_habit = get_object_or_404(UserHabit, id=habit_id, user=request.user)
-    today = timezone.now().date()
+    today = timezone.localtime(timezone.now()).date()
 
-    # Получаем все выполнения привычки
+    # Получаем все выполнения привычки (включая сегодняшний день)
     completions = HabitCompletion.objects.filter(
         user_habit=user_habit,
         date__lte=today
@@ -309,6 +360,7 @@ def habit_stats(request, habit_id):
         'total_days': total_days,
         'completed_days': completed_days,
         'current_streak': current_streak,
+        'completion_percentage': round((completed_days / total_days) * 100) if total_days > 0 else 0,
         'completions': completions[:30]  # Последние 30 дней
     })
 

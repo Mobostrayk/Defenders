@@ -1,7 +1,7 @@
 {% extends 'users/base.html' %}
 {% load static %}
 
-{% block title %}HHabits - Отслеживание привычек{% endblock %}
+{% block title %}HHabits - Трекер привычек{% endblock %}
 
 {% block content %}
     <div class="background"></div>
@@ -14,72 +14,83 @@
 
     <main class="main-content">
         <div class="glass-container">
-            <h1 class="tracking-title">Отслеживание привычек</h1>
-            
-            <!-- Сегодняшние привычки -->
-            <div class="today-habits">
-                <h2>Сегодня - {{ today|date:"d.m.Y" }}</h2>
-                {% if today_habits %}
-                    <div class="habits-list">
-                        {% for habit in today_habits %}
-                            <div class="habit-item {% if habit.completion.completed %}completed{% endif %}" 
-                                 data-habit-id="{{ habit.user_habit.id }}">
+            <div class="tracker-header">
+                <h1 class="tracking-title">Трекер привычек</h1>
+                <div class="date-navigation">
+                    <button class="nav-btn" id="prev-day">
+                        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div class="current-date">
+                        <span class="date">{{ current_date|date:"d.m.Y" }}</span>
+                        <span class="day">{{ current_date|date:"l" }}</span>
+                    </div>
+                    <button class="nav-btn" id="next-day">
+                        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Основной список привычек -->
+            <div class="habits-container">
+                {% if habits %}
+                    <ul class="habits-list">
+                        {% for habit in habits %}
+                            <li class="habit-item {% if habit.completed %}completed{% endif %} {% if habit.overdue %}overdue{% endif %}"
+                                data-habit-id="{{ habit.id }}">
                                 <label class="habit-checkbox">
-                                    <input type="checkbox" {% if habit.completion.completed %}checked{% endif %}>
+                                    <input type="checkbox" {% if habit.completed %}checked{% endif %}>
                                     <span class="checkmark"></span>
-                                    {{ habit.user_habit.habit.name }}
+                                    <span class="habit-name">{{ habit.name }}</span>
                                 </label>
                                 <div class="habit-actions">
-                                    <a href="{% url 'habit_stats' habit.user_habit.id %}" class="stats-btn" title="Статистика">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                            <path d="M3 3v18h18" />
-                                            <path d="M18 17V9" />
-                                            <path d="M13 17V5" />
-                                            <path d="M8 17v-3" />
-                                        </svg>
+                                    <a href="{% url 'habit_stats' habit.id %}" class="stats-btn" title="Статистика">
+                                        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
                                     </a>
                                 </div>
-                            </div>
+                            </li>
                         {% endfor %}
-                    </div>
+                    </ul>
                 {% else %}
-                    <p class="no-habits">Сегодня нет привычек для выполнения</p>
+                    <div class="no-habits">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0-18 0"/>
+                            <path d="M9 10a3 3 0 1 0 6 0a3 3 0 0 0-6 0"/>
+                            <path d="M8 16v1a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1"/>
+                        </svg>
+                        <p>На выбранную дату нет привычек для выполнения</p>
+                    </div>
                 {% endif %}
             </div>
 
-            <!-- Календарь привычек -->
-            <div class="calendar-section">
-                <div class="calendar-header">
-                    <button class="calendar-nav" id="prev-week">&larr; Предыдущая</button>
+            <!-- Календарь на неделю -->
+            <div class="week-calendar">
+                <div class="week-header">
                     <h3>Неделя {{ week_start|date:"d.m" }} - {{ week_end|date:"d.m" }}</h3>
-                    <button class="calendar-nav" id="next-week">Следующая &rarr;</button>
+                    <div class="week-nav">
+                        <button class="nav-btn" id="prev-week">
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <button class="nav-btn" id="next-week">
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                    </div>
                 </div>
-
-                <div class="calendar-grid">
+                <div class="week-grid">
                     {% for day in week_days %}
-                        <div class="calendar-day {% if day.date == today %}today{% endif %} {% if day.date < today %}past-day{% endif %}">
-                            <div class="day-header">
-                                <div class="day-name">{{ day.date|date:"D" }}</div>
-                                <div class="day-date">{{ day.date|date:"d.m" }}</div>
-                            </div>
-                            <div class="day-habits">
-                                {% for habit in day.habits %}
-                                    <div class="day-habit
-                                        {% if habit.completed %}completed{% endif %}
-                                        {% if habit.overdue %}overdue{% endif %}"
-                                        data-habit-id="{{ habit.id }}"
-                                        data-date="{{ day.date|date:'Y-m-d' }}">
-                                        <span class="habit-name">{{ habit.name }}</span>
-                                        {% if day.date <= tomorrow and day.date >= yesterday %}
-                                            <label class="habit-checkbox">
-                                                <input type="checkbox"
-                                                    {% if habit.completed %}checked{% endif %}
-                                                    class="habit-checkbox-input">
-                                                <span class="checkmark"></span>
-                                            </label>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
+                        <div class="week-day {% if day.date == current_date %}active{% endif %}"
+                             data-date="{{ day.date|date:'Y-m-d' }}">
+                            <span class="day-name">{{ day.date|date:"D" }}</span>
+                            <span class="day-date">{{ day.date|date:"d.m" }}</span>
+                            <div class="day-status">
+                                {% if day.has_habits %}
+                                    {% if day.all_completed %}
+                                        <span class="status-dot completed"></span>
+                                    {% elif day.some_completed %}
+                                        <span class="status-dot partial"></span>
+                                    {% else %}
+                                        <span class="status-dot pending"></span>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -90,32 +101,94 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Обработка кликов по чекбоксам (сегодняшние привычки)
-            document.querySelectorAll('.today-habits .habit-checkbox input').forEach(checkbox => {
+            // Обработка отметки привычек
+            document.querySelectorAll('.habit-checkbox input').forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     const habitItem = this.closest('.habit-item');
                     const habitId = habitItem.dataset.habitId;
-                    const today = new Date().toISOString().split('T')[0];
-                    const completed = this.checked;
-
-                    updateHabitCompletion(habitId, today, completed, habitItem);
-                });
-            });
-
-            // Обработка кликов по чекбоксам в календаре
-            document.querySelectorAll('.day-habits .habit-checkbox-input').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const habitItem = this.closest('.day-habit');
-                    const habitId = habitItem.dataset.habitId;
-                    const date = habitItem.dataset.date;
+                    const date = '{{ current_date|date:"Y-m-d" }}';
                     const completed = this.checked;
 
                     updateHabitCompletion(habitId, date, completed, habitItem);
                 });
             });
 
-            // Функция для обновления статуса выполнения привычки
+            // Навигация по дням
+            document.getElementById('prev-day').addEventListener('click', function() {
+                navigateToDate(-1);
+            });
+
+            document.getElementById('next-day').addEventListener('click', function() {
+                navigateToDate(1);
+            });
+
+            // Навигация по неделям
+            document.getElementById('prev-week').addEventListener('click', function() {
+                navigateToWeek(-1);
+            });
+
+            document.getElementById('next-week').addEventListener('click', function() {
+                navigateToWeek(1);
+            });
+
+            // Клик по дню в календаре
+            document.querySelectorAll('.week-day').forEach(day => {
+                day.addEventListener('click', function() {
+                    const date = this.dataset.date;
+                    window.location.href = `?date=${date}`;
+                });
+            });
+
+            // Функция для навигации по дням
+            function navigateToDate(days) {
+                const currentDate = new Date('{{ current_date|date:"Y-m-d" }}');
+                currentDate.setDate(currentDate.getDate() + days);
+                const newDate = currentDate.toISOString().split('T')[0];
+                window.location.href = `?date=${newDate}`;
+            }
+
+            // Функция для навигации по неделям
+            function navigateToWeek(weeks) {
+                const url = new URL(window.location.href);
+                let weekOffset = parseInt(url.searchParams.get('week_offset') || '0');
+                weekOffset += weeks;
+                url.searchParams.set('week_offset', weekOffset);
+                window.location.href = url.toString();
+            }
+
+            // Полная функция updateHabitCompletion
             function updateHabitCompletion(habitId, date, completed, element) {
+                // Получаем текущую дату с учетом часового пояса
+                const now = new Date();
+                const timezoneOffset = now.getTimezoneOffset() * 60000;
+                const localISOTime = new Date(now - timezoneOffset).toISOString();
+                const todayStr = localISOTime.split('T')[0];
+
+                // Создаем объекты Date для сравнения
+                const today = new Date(todayStr + 'T00:00:00');
+                const selectedDate = new Date(date + 'T00:00:00');
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+
+                // Проверяем допустимость даты
+                if (selectedDate > today) {
+                    alert('Нельзя отмечать привычки за будущие даты');
+                    element.querySelector('input').checked = !completed;
+                    return;
+                }
+
+                if (selectedDate < yesterday) {
+                    alert('Можно отмечать привычки только за сегодня или вчера');
+                    element.querySelector('input').checked = !completed;
+                    return;
+                }
+
+                // Показываем состояние загрузки
+                const habitName = element.querySelector('.habit-name');
+                const originalText = habitName?.innerText;
+                if (habitName) habitName.innerText = 'Сохранение...';
+
+                // Отправка данных на сервер
                 fetch("{% url 'update_habit_completion' %}", {
                     method: 'POST',
                     headers: {
@@ -125,43 +198,39 @@
                     body: JSON.stringify({
                         habit_id: habitId,
                         date: date,
-                        completed: completed
+                        completed: completed,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.status === 'success') {
-                        element.classList.toggle('completed', completed);
-                        element.classList.remove('overdue');
+                    if (data.status !== 'success') throw new Error(data.message || 'Ошибка сервера');
 
-                        // Если отмечаем за сегодня, обновляем список сегодняшних привычек
-                        const today = new Date().toISOString().split('T')[0];
-                        if (date === today) {
-                            location.reload();
-                        }
-                    } else {
-                        this.checked = !completed;
-                        alert(data.message || 'Ошибка при обновлении');
-                    }
+                    // Обновляем UI
+                    element.classList.toggle('completed', completed);
+                    element.classList.remove('overdue');
+
+                    // Обновляем статусы в календаре
+                    updateCalendarStatus();
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert(error.message);
+                    element.querySelector('input').checked = !completed;
+                })
+                .finally(() => {
+                    if (habitName && originalText) habitName.innerText = originalText;
                 });
             }
 
-            // Навигация по неделям
-            document.getElementById('prev-week').addEventListener('click', function() {
-                const url = new URL(window.location.href);
-                let weekOffset = parseInt(url.searchParams.get('week_offset') || '0');
-                weekOffset -= 1;
-                url.searchParams.set('week_offset', weekOffset);
-                window.location.href = url.toString();
-            });
-
-            document.getElementById('next-week').addEventListener('click', function() {
-                const url = new URL(window.location.href);
-                let weekOffset = parseInt(url.searchParams.get('week_offset') || '0');
-                weekOffset += 1;
-                url.searchParams.set('week_offset', weekOffset);
-                window.location.href = url.toString();
-            });
+            // Функция для обновления статусов в календаре
+            function updateCalendarStatus() {
+                // Здесь можно добавить логику для обновления точек статуса в календаре
+                // Например, сделать новый запрос к серверу для актуальных данных
+            }
         });
     </script>
 
@@ -170,46 +239,83 @@
             --primary: #8b5cf6;
             --primary-hover: #7c3aed;
             --success: #10b981;
-            --danger: #ef4444;
             --warning: #f59e0b;
+            --danger: #ef4444;
             --glass: rgba(255, 255, 255, 0.7);
             --glass-border: rgba(255, 255, 255, 0.9);
             --text-dark: #1f2937;
-            --text-light: #f9fafb;
             --card-bg: rgba(255, 255, 255, 0.9);
-            --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
         }
 
-        [data-theme="dark"] {
-            --primary: #8b5cf6;
-            --primary-hover: #7c3aed;
-            --glass: rgba(31, 41, 55, 0.3);
-            --glass-border: rgba(55, 65, 81, 0.4);
-            --text-dark: #f3f4f6;
-            --text-light: #1f2937;
-            --card-bg: rgba(31, 41, 55, 0.9);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        .tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
         }
 
         .tracking-title {
-            font-size: 2rem;
-            margin-bottom: 2rem;
+            font-size: 1.8rem;
             background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-align: center;
         }
 
-        .today-habits, .calendar-section {
+        .date-navigation {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .current-date {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .current-date .date {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .current-date .day {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: capitalize;
+        }
+
+        .nav-btn {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .habits-container {
             background: var(--card-bg);
             border-radius: 16px;
             padding: 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
             border: 1px solid var(--glass-border);
+            min-height: 200px;
         }
 
         .habits-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
             display: flex;
             flex-direction: column;
             gap: 0.8rem;
@@ -221,7 +327,7 @@
             align-items: center;
             padding: 1rem;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
         }
 
@@ -229,12 +335,15 @@
             background: rgba(16, 185, 129, 0.1);
         }
 
+        .habit-item.overdue {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
         .habit-checkbox {
             display: flex;
             align-items: center;
             gap: 0.8rem;
             cursor: pointer;
-            font-weight: 500;
             flex-grow: 1;
         }
 
@@ -267,150 +376,122 @@
             transform: rotate(45deg);
         }
 
-        .habit-actions {
-            display: flex;
-            gap: 0.8rem;
-        }
-
-        .stats-btn {
-            color: var(--text-dark);
-            opacity: 0.6;
-            transition: all 0.3s ease;
-        }
-
-        .stats-btn:hover {
-            opacity: 1;
-            color: var(--primary);
-        }
-
-        /* Стили для календаря */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .calendar-nav {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .calendar-nav:hover {
-            color: var(--primary-hover);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.8rem;
-        }
-
-        .calendar-day {
-            padding: 1rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .calendar-day.today {
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid var(--primary);
-        }
-
-        .calendar-day.past-day {
-            opacity: 0.8;
-        }
-
-        .day-header {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .day-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--primary);
-        }
-
-        .day-date {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .day-habits {
-            display: flex;
-            flex-direction: column;
-            gap: 0.6rem;
-        }
-
-        .day-habit {
-            font-size: 0.85rem;
-            padding: 0.6rem;
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .day-habit.completed {
-            background: var(--success);
-            color: white;
-        }
-
-        .day-habit.overdue {
-            background: var(--danger);
-            color: white;
-        }
-
         .habit-name {
-            flex-grow: 1;
-            margin-right: 0.5rem;
+            font-weight: 500;
         }
 
         .no-habits {
+            text-align: center;
+            padding: 2rem;
             color: var(--text-dark);
             opacity: 0.7;
-            font-style: italic;
-            text-align: center;
-            padding: 1rem;
         }
 
-        @media (max-width: 1024px) {
-            .calendar-grid {
+        .no-habits svg {
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .week-calendar {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .week-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .week-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .week-day {
+            padding: 0.6rem 0.3rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .week-day.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .week-day:hover:not(.active) {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .day-name {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .day-date {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .day-status {
+            height: 4px;
+            margin-top: 4px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .status-dot {
+            width: 16px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .status-dot.completed {
+            background: var(--success);
+        }
+
+        .status-dot.partial {
+            background: var(--warning);
+        }
+
+        .status-dot.pending {
+            background: var(--danger);
+        }
+
+        @media (max-width: 768px) {
+            .tracker-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .week-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
         }
 
-        @media (max-width: 768px) {
-            .calendar-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .tracking-title {
-                font-size: 1.8rem;
-            }
-        }
-
         @media (max-width: 480px) {
-            .calendar-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .calendar-header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .tracking-title {
-                font-size: 1.6rem;
+            .week-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
