@@ -51,8 +51,31 @@
                     <div class="habits-list">
                         {% for user_habit in user_habits %}
                             <div class="habit-card">
-                                <h3 class="habit-name">{{ user_habit.habit.name }}</h3>
-                                <p class="habit-date">Добавлено: {{ user_habit.created_at|date:"d.m.Y H:i" }}</p>
+                                <div class="habit-header">
+                                    <h3 class="habit-name">{{ user_habit.habit.name }}</h3>
+                                    <div class="habit-actions">
+                                        <a href="{% url 'habit_stats' user_habit.id %}" class="stats-btn">
+                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
+                                        </a>
+                                        <a href="{% url 'habit_settings' user_habit.id %}" class="settings-btn">
+                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="habit-days">
+                                    {% if user_habit.habit.is_fixed %}
+                                        <span class="day-badge">Каждый день</span>
+                                    {% else %}
+                                        {% if user_habit.monday %}<span class="day-badge">Пн</span>{% endif %}
+                                        {% if user_habit.tuesday %}<span class="day-badge">Вт</span>{% endif %}
+                                        {% if user_habit.wednesday %}<span class="day-badge">Ср</span>{% endif %}
+                                        {% if user_habit.thursday %}<span class="day-badge">Чт</span>{% endif %}
+                                        {% if user_habit.friday %}<span class="day-badge">Пт</span>{% endif %}
+                                        {% if user_habit.saturday %}<span class="day-badge">Сб</span>{% endif %}
+                                        {% if user_habit.sunday %}<span class="day-badge">Вс</span>{% endif %}
+                                    {% endif %}
+                                </div>
+                                <p class="habit-date">Добавлено: {{ user_habit.created_at|date:"d.m.Y" }}</p>
                             </div>
                         {% endfor %}
                     </div>

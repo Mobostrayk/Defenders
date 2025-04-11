@@ -1,0 +1,84 @@
+{% extends 'main/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="background"></div>
+<main class="main-content">
+    <div class="glass-container habit-days-container">
+        <h2>Настройка привычки: {{ habit.name }}</h2>
+        
+        {% if is_fixed %}
+            <p>Эта привычка выполняется каждый день</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn-save">Сохранить привычку</button>
+            </form>
+        {% else %}
+            <p>Выберите дни недели для выполнения:</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="days-grid">
+                    {% for field in form %}
+                    <div class="day-checkbox">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-save">Сохранить привычку</button>
+            </form>
+        {% endif %}
+    </div>
+</main>
+
+<style>
+.habit-days-container {
+    max-width: 500px;
+    text-align: center;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.day-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+.day-checkbox:hover {
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.day-checkbox input {
+    width: 18px;
+    height: 18px;
+    accent-color: #8b5cf6;
+}
+
+.btn-save {
+    padding: 12px 24px;
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.btn-save:hover {
+    background: #7c3aed;
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

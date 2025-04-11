@@ -175,48 +175,56 @@ def check_username(request):
 @login_required
 def track_habits(request):
     today = timezone.now().date()
+    tomorrow = today + timedelta(days=1)
+    yesterday = today - timedelta(days=1)
+
+    # Обработка навигации по неделям
+    week_offset = int(request.GET.get('week_offset', 0))
+    week_start = today - timedelta(days=today.weekday()) + timedelta(weeks=week_offset)
+    week_end = week_start + timedelta(days=6)
+
     user_habits = UserHabit.objects.filter(user=request.user).select_related('habit')
 
-    # Получаем привычки для сегодня
-    today_habits = []
-    for user_habit in user_habits:
-        if today.weekday() in user_habit.get_selected_days():
-            completion, created = HabitCompletion.objects.get_or_create(
-                user_habit=user_habit,
-                date=today,
-                defaults={'completed': False}
-            )
-            today_habits.append({
-                'user_habit': user_habit,
-                'completion': completion
-            })
-
-    # Получаем историю за последние 7 дней
-    history = []
+    # Формируем данные для календаря
+    week_days = []
     for i in range(7):
-        date = today - timedelta(days=i)
-        habits_for_day = []
+        day_date = week_start + timedelta(days=i)
+        day_habits = []
+
         for user_habit in user_habits:
-            if date.weekday() in user_habit.get_selected_days():
+            if day_date.weekday() in user_habit.get_selected_days():
                 try:
-                    completion = HabitCompletion.objects.get(user_habit=user_habit, date=date)
-                    habits_for_day.append({
-                        'habit': user_habit.habit.name,
-                        'completed': completion.completed
-                    })
+                    completion = HabitCompletion.objects.get(
+                        user_habit=user_habit,
+                        date=day_date
+                    )
+                    completed = completion.completed
                 except HabitCompletion.DoesNotExist:
-                    habits_for_day.append({
-                        'habit': user_habit.habit.name,
-                        'completed': False
-                    })
-        history.append({
-            'date': date,
-            'habits': habits_for_day
+                    completed = False
+
+                # Проверяем просрочку (больше 2 дней назад и не выполнено)
+                overdue = (day_date < today - timedelta(days=1)) and not completed
+
+                day_habits.append({
+                    'id': user_habit.id,
+                    'name': user_habit.habit.name,
+                    'completed': completed,
+                    'overdue': overdue
+                })
+
+        week_days.append({
+            'date': day_date,
+            'habits': day_habits
         })
 
     return render(request, 'users/track_habits.html', {
-        'today_habits': today_habits,
-        'history': history
+        'today': today,
+        'tomorrow': tomorrow,
+        'yesterday': yesterday,
+        'week_start': week_start,
+        'week_end': week_end,
+        'week_days': week_days,
+        'week_offset': week_offset
     })
 
 

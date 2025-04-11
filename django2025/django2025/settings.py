@@ -141,3 +141,6 @@ EMAIL_HOST_USER = 'mobostrayk@gmail.com'
 EMAIL_HOST_PASSWORD = 'btqaasicpkojyoti'
 DEFAULT_FROM_EMAIL = 'confirm@hhabits.com'
 SERVER_EMAIL = 'noreply@hhabits.com'
+
+TIME_ZONE = 'Europe/Moscow'  # Или ваш часовой пояс
+USE_TZ = True

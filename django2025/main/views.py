@@ -5,6 +5,8 @@ from django.contrib import messages
 from users.models import Habit, UserHabit
 import random
 
+from users.forms import HabitDaysForm
+
 
 def about(request):
     return render(request,'main/about.html')
@@ -42,33 +44,74 @@ def index(request):
 @login_required(login_url='login')
 def save_habit(request, habit_id):
     habit = get_object_or_404(Habit, id=habit_id)
-    user_habit, created = UserHabit.objects.get_or_create(user=request.user, habit=habit)
 
-    # Если привычка новая, устанавливаем дни по умолчанию
-    if created:
+    # Проверяем, есть ли уже такая привычка у пользователя
+    if UserHabit.objects.filter(user=request.user, habit=habit).exists():
+        messages.info(request, f'Привычка "{habit.name}" уже сохранена!')
+        return redirect('index')
+
+    if request.method == 'POST':
+        # Если привычка фиксированная, сохраняем все дни
         if habit.is_fixed:
-            # Все дни для фиксированных привычек
-            user_habit.monday = True
-            user_habit.tuesday = True
-            user_habit.wednesday = True
-            user_habit.thursday = True
-            user_habit.friday = True
-            user_habit.saturday = True
-            user_habit.sunday = True
-        elif habit.weekend_only:
-            # Только выходные
-            user_habit.saturday = True
-            user_habit.sunday = True
-        else:
-            # По умолчанию - все дни
-            user_habit.monday = True
-            user_habit.tuesday = True
-            user_habit.wednesday = True
-            user_habit.thursday = True
-            user_habit.friday = True
-            user_habit.saturday = True
-            user_habit.sunday = True
-        user_habit.save()
+            user_habit = UserHabit.objects.create(
+                user=request.user,
+                habit=habit,
+                monday=True,
+                tuesday=True,
+                wednesday=True,
+                thursday=True,
+                friday=True,
+                saturday=True,
+                sunday=True
+            )
+            messages.success(request, f'Привычка "{habit.name}" сохранена!')
+            return redirect('profile')
 
-    messages.success(request, f'Привычка "{habit.name}" сохранена!')
-    return redirect('index')
+        # Если не фиксированная, обрабатываем форму
+        form = HabitDaysForm(request.POST)
+        if form.is_valid():
+            user_habit = form.save(commit=False)
+            user_habit.user = request.user
+            user_habit.habit = habit
+            user_habit.save()
+            messages.success(request, f'Привычка "{habit.name}" сохранена!')
+            return redirect('profile')
+    else:
+        # Для фиксированных привычек сразу сохраняем
+        if habit.is_fixed:
+            user_habit = UserHabit.objects.create(
+                user=request.user,
+                habit=habit,
+                monday=True,
+                tuesday=True,
+                wednesday=True,
+                thursday=True,
+                friday=True,
+                saturday=True,
+                sunday=True
+            )
+            messages.success(request, f'Привычка "{habit.name}" сохранена!')
+            return redirect('profile')
+
+        # Для остальных показываем форму выбора дней
+        initial = {}
+        if habit.weekend_only:
+            initial = {'saturday': True, 'sunday': True}
+        else:
+            initial = {
+                'monday': True,
+                'tuesday': True,
+                'wednesday': True,
+                'thursday': True,
+                'friday': True,
+                'saturday': True,
+                'sunday': True
+            }
+
+        form = HabitDaysForm(initial=initial)
+
+    return render(request, 'main/save_habit.html', {
+        'habit': habit,
+        'form': form,
+        'is_fixed': habit.is_fixed
+    })
