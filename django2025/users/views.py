@@ -173,8 +173,6 @@ def check_username(request):
     return JsonResponse({'exists': exists})
 
 
-
-@login_required
 @login_required
 def track_habits(request):
     # Настройка часового пояса
@@ -201,6 +199,10 @@ def track_habits(request):
     # Привычки для текущей даты
     habits_for_date = []
     for user_habit in user_habits:
+        # Проверяем, что привычка уже существовала на эту дату
+        if current_date < user_habit.created_at.date():
+            continue
+
         if current_date.weekday() in user_habit.get_selected_days():
             try:
                 completion = HabitCompletion.objects.get(
@@ -211,7 +213,6 @@ def track_habits(request):
             except HabitCompletion.DoesNotExist:
                 completed = False
 
-            # Проверяем просрочку (если дата раньше вчера и не выполнено)
             yesterday = current_date - timedelta(days=1)
             overdue = (current_date < yesterday) and not completed
 
@@ -230,6 +231,10 @@ def track_habits(request):
         day_completions = []
 
         for user_habit in user_habits:
+            # Пропускаем привычки, которых еще не было в этот день
+            if day_date < user_habit.created_at.date():
+                continue
+
             if day_date.weekday() in user_habit.get_selected_days():
                 try:
                     completion = HabitCompletion.objects.get(
@@ -240,7 +245,7 @@ def track_habits(request):
                 except HabitCompletion.DoesNotExist:
                     day_completions.append(False)
 
-        # Определяем статус дня
+        # Определяем статус дня только для существовавших привычек
         has_habits = len(day_completions) > 0
         all_completed = has_habits and all(day_completions)
         some_completed = has_habits and any(day_completions) and not all_completed
