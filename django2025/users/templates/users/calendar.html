@@ -1,0 +1,136 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div class="calendar-container">
+    <h2>Календарь привычек</h2>
+    <div class="calendar">
+        {% for day in days %}
+        <div class="day {% if day.is_today %}today{% endif %}">
+            <div class="day-header">
+                {{ day.date|date:"D d.m" }}
+            </div>
+            <div class="habits">
+                {% for habit in day.habits %}
+                <div class="habit {% if habit.completed %}completed{% endif %} {% if habit.expired %}expired{% endif %}">
+                    <label>
+                        <input type="checkbox" {% if habit.completed %}checked{% endif %}
+                               data-habit-id="{{ habit.id }}" data-date="{{ day.date|date:'Y-m-d' }}"
+                               {% if day.date > today and not day.is_today %}disabled{% endif %}>
+                        {{ habit.name }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.habit input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.disabled) return;
+            
+            const habitId = this.dataset.habitId;
+            const date = this.dataset.date;
+            const completed = this.checked;
+            
+            fetch("{% url 'track_habit' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    habit_id: habitId,
+                    date: date,
+                    completed: completed
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'success') {
+                    this.checked = !completed;
+                    alert(data.message || 'Ошибка при обновлении');
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+.day {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+}
+.day.today {
+    background-color: #f0f8ff;
+    border-color: #8b5cf6;
+}
+.day-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+.habit {
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
+.habit.completed {
+    background-color: #e6ffed;
+}
+.habit.expired {
+    background-color: #ffebee;
+    opacity: 0.6;
+}
+.habit input {
+    margin-right: 8px;
+}
+  /* Стили для профиля */
+.habit-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.habit-meta {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
+    font-size: 0.9em;
+    color: #666;
+}
+.habit-actions {
+    display: flex;
+    gap: 10px;
+}
+.btn {
+    padding: 5px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-primary {
+    background: #8b5cf6;
+    color: white;
+}
+.btn-secondary {
+    border: 1px solid #8b5cf6;
+    color: #8b5cf6;
+}
+</style>
+{% endblock %}
