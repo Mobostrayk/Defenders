@@ -1,0 +1,563 @@
+/* Profile page styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Основные стили из profile.css */
+:root {
+    /* Светлая тема */
+    --primary: #8b5cf6;
+    --primary-hover: #7c3aed;
+    --glass: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.9);
+    --text-dark: #1f2937;
+    --text-light: #f9fafb;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --shadow: 0 8px 32px rgba(31, 41, 55, 0.1);
+    --bg-color-1: #FFE8E7;
+    --bg-color-2: #F6E8FF;
+    --bg-accent: #e0e7ff;
+}
+
+[data-theme="dark"] {
+    /* Тёмная тема */
+    --primary: #8b5cf6;
+    --primary-hover: #7c3aed;
+    --glass: rgba(31, 41, 55, 0.3);
+    --glass-border: rgba(55, 65, 81, 0.4);
+    --text-dark: #f3f4f6;
+    --text-light: #1f2937;
+    --card-bg: rgba(31, 41, 55, 0.9);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --bg-color-1: #391C3A;
+    --bg-color-2: #312741;
+    --bg-accent: #1f2937;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    color: var(--text-dark);
+    transition: all 0.3s ease;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(-45deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-1), var(--bg-color-2));
+    background-size: 400% 400%;
+    z-index: -2;
+    animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.glass-container {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.main-title {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    opacity: 0.8;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+}
+
+/* Анимированная кнопка с эффектом жидкости */
+.generate-btn {
+    position: relative;
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    margin-bottom: 2rem;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.generate-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+}
+
+.liquid {
+    position: absolute;
+    top: -80px;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    background: var(--primary);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
+    z-index: -1;
+    transition: 0.8s;
+}
+
+.liquid::after,
+.liquid::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -75%);
+    background: #fff;
+}
+
+.liquid::before {
+    border-radius: 45%;
+    background: rgba(255, 255, 255, 0.5);
+    animation: animate 5s linear infinite;
+}
+
+.liquid::after {
+    border-radius: 40%;
+    background: rgba(255, 255, 255, 0.2);
+    animation: animate 10s linear infinite;
+}
+
+@keyframes animate {
+    0% { transform: translate(-50%, -75%) rotate(0deg); }
+    100% { transform: translate(-50%, -75%) rotate(360deg); }
+}
+
+.generate-btn:hover .liquid {
+    top: -120px;
+}
+
+/* Карточка привычки */
+.habit-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    box-shadow: var(--shadow);
+    transform: translateY(20px);
+    opacity: 0;
+    animation: fadeInUp 0.5s forwards;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+}
+
+@keyframes fadeInUp {
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.habit-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+}
+
+/* Кнопка сохранения */
+.save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.saved-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #e5e7eb;
+    color: #4b5563;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Кнопка переключения темы */
+.theme-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    color: var(--text-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] .moon {
+    display: none;
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+    .glass-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .main-title {
+        font-size: 2rem;
+    }
+}
+
+.profile-container {
+    max-width: 800px;
+    padding: 2.5rem;
+    text-align: left;
+}
+
+.profile-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--primary);
+    text-align: center;
+}
+
+/* Avatar styles */
+.avatar-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.avatar-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--bg-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    border: 3px dashed var(--primary);
+}
+
+/* Profile info styles */
+.profile-info {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.info-value {
+    color: var(--text-dark);
+}
+
+/* Habits section styles */
+.habits-section {
+    margin-top: 2rem;
+}
+
+.habits-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+    text-align: center;
+}
+
+.habits-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.no-habits {
+    text-align: center;
+    color: var(--text-dark);
+    opacity: 0.7;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-radius: 16px;
+}
+
+/* Habit card styles */
+.habit-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    position: relative;
+}
+
+.habit-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
+}
+
+.habit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.habit-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 0;
+}
+
+.habit-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.stats-btn, .settings-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--primary);
+    transition: all 0.2s ease;
+}
+
+.stats-btn:hover, .settings-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.1);
+}
+
+.habit-days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.day-badge {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.habit-date {
+    font-size: 0.8rem;
+    color: var(--text-dark);
+    opacity: 0.7;
+    margin-top: 0.5rem;
+}
+
+/* Profile actions */
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.9rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    border: none;
+    cursor: pointer;
+}
+
+.primary-btn {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.primary-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+}
+
+.secondary-btn {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.secondary-btn:hover {
+    background: rgba(139, 92, 246, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1.5rem;
+    }
+
+    .profile-title {
+        font-size: 1.5rem;
+    }
+
+    .avatar-image, .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+    }
+
+    .habit-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .habit-actions {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-item {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .profile-actions {
+        gap: 0.75rem;
+    }
+
+    .action-btn {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animation for habit cards */
+.habit-card {
+    animation: fadeInUp 0.5s forwards;
+    animation-delay: calc(var(--order) * 0.1s);
+    opacity: 0;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
