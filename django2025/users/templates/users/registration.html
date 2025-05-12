@@ -88,5 +88,15 @@
     <link rel="stylesheet" href="{% static 'users/css/registration.css' %}">
 
     <!-- Подключаем JS -->
-    <script src="{% static 'users/js/registration.js' %}"></script>
+    <script>
+        // Передаем Django-переменные в JS
+        window.formIds = {
+            username: '{{ form.username.id_for_label }}',
+            email: '{{ form.email.id_for_label }}',
+            password1: '{{ form.password1.id_for_label }}',
+            password2: '{{ form.password2.id_for_label }}',
+            csrfToken: '{{ csrf_token }}'
+        };
+    </script>
+    <script src="{% static 'users/js/registration.js' %}" defer></script>
 {% endblock %}
