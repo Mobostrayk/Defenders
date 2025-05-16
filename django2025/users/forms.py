@@ -3,6 +3,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .models import UserHabit
+from django import forms
+from captcha.fields import CaptchaField
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -21,14 +23,16 @@ class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
-# forms.py
+
 class VerificationForm(forms.Form):
     code = forms.CharField(
+        label='Код подтверждения',
         max_length=6,
-        widget=forms.TextInput(attrs={
-            'class': 'form-input',  # Вот здесь задаем класс
-            'placeholder': 'Введите код из письма'
-        })
+        widget=forms.TextInput(attrs={'class': 'form-input'})
+    )
+    captcha = CaptchaField(
+        label='Введите текст с картинки',
+        error_messages={'invalid': 'Неверная капча'}
     )
 
 class HabitSettingsForm(forms.ModelForm):

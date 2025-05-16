@@ -3,7 +3,10 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 import uuid
 from django.contrib.auth.models import AbstractUser
-
+from django.db import models
+from django.utils import timezone
+import random
+import string
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -67,21 +70,30 @@ class HabitCompletion(models.Model):
         return f"{self.user_habit} - {self.date} - {'Выполнено' if self.completed else 'Не выполнено'}"
 
 
+
+
 class EmailVerification(models.Model):
     email = models.EmailField(unique=True)
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
-    def is_expired(self):
-        return timezone.now() > self.expires_at
-
     @classmethod
     def create_verification(cls, email):
+        # Удаляем старые верификации для этого email
         cls.objects.filter(email=email).delete()
-        return cls.objects.create(
+
+        # Генерируем 6-значный код
+        code = ''.join(random.choices(string.digits, k=6))
+
+        # Создаем верификацию на 5 минут
+        verification = cls.objects.create(
             email=email,
-            code=str(uuid.uuid4())[:6].upper(),
-            expires_at=timezone.now() + timezone.timedelta(hours=1),
+            code=code,
+            expires_at=timezone.now() + timezone.timedelta(minutes=5)
         )
+        return verification
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
 

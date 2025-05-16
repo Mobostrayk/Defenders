@@ -3,6 +3,7 @@
 {% block title %}Подтверждение email{% endblock %}
 
 {% load static %}
+
 {% block content %}
 <div class="background"></div>
 <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
@@ -15,33 +16,53 @@
 <main class="main-content">
     <div class="glass-container auth-container">
         <h1 class="auth-title">Подтверждение email</h1>
-        
+
         <p class="text-center mb-4">Мы отправили код подтверждения на <strong>{{ email }}</strong></p>
         <p class="text-center text-muted small mb-4">Код действителен до {{ expires_at|time }}</p>
-        
+
         <form method="post" class="auth-form">
             {% csrf_token %}
-            {{ form.non_field_errors }}
-            
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- Поле для кода -->
             <div class="form-group">
-                <label for="{{ form.code.id_for_label }}" class="form-label">Код подтверждения</label>
+                {{ form.code.label_tag }}
                 {{ form.code }}
-                {{ form.code.errors }}
+                {% if form.code.errors %}
+                    <div class="invalid-feedback" style="display: block;">
+                        {{ form.code.errors.0 }}
+                    </div>
+                {% endif %}
             </div>
-            
+
+            <!-- Капча -->
+            <div class="form-group">
+                {{ form.captcha.label_tag }}
+                {{ form.captcha }}
+                {% if form.captcha.errors %}
+                    <div class="invalid-feedback" style="display: block;">
+                        {{ form.captcha.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
             <button type="submit" class="auth-btn">Подтвердить</button>
         </form>
-        
-        <div class="auth-links">
-            <p>Не получили код? Проверьте папку "Спам"</p>
-        </div>
 
+        <div class="auth-links">
+            <p>Не получили код? <a href="#" id="resend-btn">Отправить повторно</a></p>
+        </div>
     </div>
 </main>
-    <!-- Подключаем CSS -->
-    <link rel="stylesheet" href="{% static 'users/css/verifly_email.css' %}">
 
-    <!-- Подключаем JS -->
-    <script src="{% static 'users/js/verifly_email.js' %}"></script>
+<!-- Подключаем CSS -->
+<link rel="stylesheet" href="{% static 'users/css/verifly_email.css' %}">
 
+<!-- Подключаем JS -->
+<script src="{% static 'users/js/verifly_email.js' %}"></script>
 {% endblock %}

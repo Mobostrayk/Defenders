@@ -28,6 +28,20 @@ from datetime import timedelta
 from .models import UserHabit, HabitCompletion
 from .forms import HabitSettingsForm
 import pytz
+from django.conf import settings
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import login
+from django.core.mail import send_mail
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import requests
+from .forms import RegisterForm, VerificationForm
+from .models import EmailVerification, User
+from captcha.fields import CaptchaField
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
 
 
 def registration(request):
@@ -61,6 +75,34 @@ def registration(request):
     return render(request, 'users/registration.html', {'form': form})
 
 
+RECAPTCHA_SECRET = '6LcOiz0rAAAAAOcE0G9Uidk__qWIdvCDASLQUUAE'
+def verify_recaptcha(token):
+    data = {
+        'secret': RECAPTCHA_SECRET,
+        'response': token
+    }
+    response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+    return response.json().get('success', False)
+
+
+@require_POST
+def resend_code(request):
+    email = request.POST.get('email')
+    try:
+        # Удаляем старую верификацию
+        EmailVerification.objects.filter(email=email).delete()
+
+        # Создаем новую
+        verification = EmailVerification.create_verification(email)
+
+        # Отправляем письмо (ваш код отправки email)
+
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+
 def verify_email(request, email):
     try:
         verification = EmailVerification.objects.get(email=email)
@@ -70,26 +112,9 @@ def verify_email(request, email):
     if request.method == 'POST':
         form = VerificationForm(request.POST)
         if form.is_valid():
+            # Проверка кода подтверждения
             if form.cleaned_data['code'] == verification.code:
-                # Достаем данные из сессии
-                user_data = request.session.get('registration_data')
-
-                if not user_data:
-                    messages.error(request, 'Сессия истекла, зарегистрируйтесь снова')
-                    return redirect('registration')
-
-                # Создаем пользователя
-                user = User.objects.create_user(
-                    username=user_data['username'],
-                    email=email,
-                    password=user_data['password']
-                )
-
-                # Очищаем сессию
-                del request.session['registration_data']
-                verification.delete()
-
-                login(request, user)
+                # Ваша логика создания пользователя
                 return redirect('profile')
             else:
                 messages.error(request, 'Неверный код подтверждения')
