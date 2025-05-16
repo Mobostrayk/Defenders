@@ -18,7 +18,9 @@
         <h1 class="auth-title">Подтверждение email</h1>
 
         <p class="text-center mb-4">Мы отправили код подтверждения на <strong>{{ email }}</strong></p>
-        <p class="text-center text-muted small mb-4">Код действителен до {{ expires_at|time }}</p>
+        <p class="text-center text-muted small mb-4" id="timer">
+            Код действителен еще: {{ minutes }}:{{ seconds }}
+        </p>
 
         <form method="post" class="auth-form">
             {% csrf_token %}
@@ -53,10 +55,6 @@
 
             <button type="submit" class="auth-btn">Подтвердить</button>
         </form>
-
-        <div class="auth-links">
-            <p>Не получили код? <a href="#" id="resend-btn">Отправить повторно</a></p>
-        </div>
     </div>
 </main>
 
@@ -64,5 +62,9 @@
 <link rel="stylesheet" href="{% static 'users/css/verifly_email.css' %}">
 
 <!-- Подключаем JS -->
+<script>
+    // Передаем данные из Django в JS
+    const initialSeconds = {{ remaining_seconds }};
+</script>
 <script src="{% static 'users/js/verifly_email.js' %}"></script>
 {% endblock %}

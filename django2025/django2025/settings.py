@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
-
+# Для тестирования (письма будут выводиться в консоль)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CAPTCHA_FONT_SIZE = 42
 CAPTCHA_LENGTH = 6
 CAPTCHA_TIMEOUT = 5

@@ -1,53 +1,61 @@
+
+  // Переключение темы
+    const themeToggle = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+
+    document.documentElement.setAttribute('data-theme', currentTheme);
+
+    themeToggle.addEventListener('click', () => {
+        const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Таймер обратного отсчета
-    function startTimer(duration, display) {
-        let timer = duration, minutes, seconds;
-        const interval = setInterval(function () {
-            minutes = parseInt(timer / 60, 10);
-            seconds = parseInt(timer % 60, 10);
+    let remainingSeconds = initialSeconds;
+    const timerElement = document.getElementById('timer');
 
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
+    function updateTimer() {
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
 
-            display.textContent = "Код действителен еще: " + minutes + ":" + seconds;
+        timerElement.textContent =
+            `Код действителен еще: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
-            if (--timer < 0) {
-                clearInterval(interval);
-                display.textContent = "Срок действия кода истек";
+        if (remainingSeconds <= 0) {
+            timerElement.textContent = 'Срок действия кода истек';
+            return;
+        }
+
+        remainingSeconds--;
+        setTimeout(updateTimer, 1000);
+    }
+
+    // Запускаем таймер
+    updateTimer();
+
+    // Код для повторной отправки...
+    document.getElementById('resend-btn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch('/resend-code/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: `email=${encodeURIComponent('{{ email }}')}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                remainingSeconds = 300; // 5 минут
+                updateTimer();
+                alert('Новый код отправлен!');
+            } else {
+                alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
             }
-        }, 1000);
-    }
-
-    const timerDisplay = document.querySelector('.text-muted.small');
-    if (timerDisplay) {
-        startTimer(300, timerDisplay); // 5 минут = 300 секунд
-    }
-
-    // Обработчик повторной отправки
-    const resendBtn = document.getElementById('resend-btn');
-    if (resendBtn) {
-        resendBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            fetch('/resend-code/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: `email=${encodeURIComponent('{{ email }}')}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Новый код отправлен!');
-                    if (timerDisplay) {
-                        startTimer(300, timerDisplay);
-                    }
-                } else {
-                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
-                }
-            });
         });
-    }
+    });
 });

@@ -293,3 +293,29 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для контраста 
                 height: 2.2rem;
             }
         }
+
+
+/* Стили для капчи */
+.captcha {
+    margin: 20px 0;
+}
+
+.captcha .captcha-image {
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.captcha .captcha-refresh {
+    cursor: pointer;
+    color: #0066cc;
+    margin-left: 10px;
+}
+
+.captcha input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 5px;
+}

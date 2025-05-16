@@ -23,6 +23,11 @@ class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
+    captcha = CaptchaField(
+        label='Подтвердите что вы не робот',
+        error_messages={'invalid': 'Неверная капча'}
+    )
+
 
 class VerificationForm(forms.Form):
     code = forms.CharField(

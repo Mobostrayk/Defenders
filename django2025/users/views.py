@@ -43,24 +43,26 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 
-
 def registration(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
 
-            # Сохраняем данные формы в сессии
+            # Удаляем старые верификации перед созданием новой
+            EmailVerification.objects.filter(email=email).delete()
+
+            # Создаем новую верификацию
+            verification = EmailVerification.create_verification(email)
+
+            # Сохраняем данные в сессии
             request.session['registration_data'] = {
                 'username': form.cleaned_data['username'],
                 'email': email,
                 'password': form.cleaned_data['password1'],
             }
 
-            # Создаем верификацию (теперь без user_data)
-            verification = EmailVerification.create_verification(email)
-
-            # Отправляем email
+            # Отправляем письмо
             send_mail(
                 'Подтверждение email',
                 f'Ваш код подтверждения: {verification.code}',
@@ -102,20 +104,50 @@ def resend_code(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
-
 def verify_email(request, email):
     try:
         verification = EmailVerification.objects.get(email=email)
+        remaining_time = verification.expires_at - timezone.now()
+        remaining_seconds = max(0, int(remaining_time.total_seconds()))
+        minutes = remaining_seconds // 60
+        seconds = remaining_seconds % 60
     except EmailVerification.DoesNotExist:
         return redirect('registration')
 
     if request.method == 'POST':
         form = VerificationForm(request.POST)
         if form.is_valid():
-            # Проверка кода подтверждения
             if form.cleaned_data['code'] == verification.code:
-                # Ваша логика создания пользователя
-                return redirect('profile')
+                user_data = request.session.get('registration_data')
+
+                if not user_data:
+                    messages.error(request, 'Сессия истекла, зарегистрируйтесь снова')
+                    return redirect('registration')
+
+                try:
+                    # Создаем пользователя
+                    user = User.objects.create_user(
+                        username=user_data['username'],
+                        email=email,
+                        password=user_data['password']
+                    )
+
+                    # Авторизуем сразу
+                    user = authenticate(
+                        username=user_data['username'],
+                        password=user_data['password']
+                    )
+                    login(request, user)
+
+                    # Очищаем данные
+                    del request.session['registration_data']
+                    verification.delete()
+
+                    return redirect('profile')
+
+                except Exception as e:
+                    messages.error(request, f'Ошибка: {str(e)}')
+                    return redirect('registration')
             else:
                 messages.error(request, 'Неверный код подтверждения')
     else:
@@ -124,7 +156,9 @@ def verify_email(request, email):
     return render(request, 'users/verify_email.html', {
         'form': form,
         'email': email,
-        'expires_at': verification.expires_at
+        'minutes': minutes,
+        'seconds': f"{seconds:02d}",
+        'remaining_seconds': remaining_seconds
     })
 
 
@@ -143,6 +177,7 @@ def user_login(request):
                 messages.error(request, 'Неверные учетные данные')
     else:
         form = LoginForm()
+
     return render(request, 'users/login.html', {'form': form})
 
 def logout(request):

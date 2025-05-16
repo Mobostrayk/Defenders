@@ -7,6 +7,9 @@ from django.db import models
 from django.utils import timezone
 import random
 import string
+from django.db import models
+from django.utils import timezone
+import random
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -73,7 +76,7 @@ class HabitCompletion(models.Model):
 
 
 class EmailVerification(models.Model):
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -83,17 +86,25 @@ class EmailVerification(models.Model):
         # Удаляем старые верификации для этого email
         cls.objects.filter(email=email).delete()
 
-        # Генерируем 6-значный код
-        code = ''.join(random.choices(string.digits, k=6))
+        # Генерируем новый код
+        code = str(random.randint(100000, 999999))
 
-        # Создаем верификацию на 5 минут
-        verification = cls.objects.create(
+        # Создаем новую верификацию
+        return cls.objects.create(
             email=email,
             code=code,
             expires_at=timezone.now() + timezone.timedelta(minutes=5)
         )
-        return verification
 
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+    @classmethod
+    def create_verification(cls, email):
+        code = str(random.randint(100000, 999999))  # 6-значный код
+        return cls.objects.create(
+            email=email,
+            code=code,
+            expires_at=timezone.now() + timezone.timedelta(minutes=5)
+        )
 

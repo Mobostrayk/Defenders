@@ -72,6 +72,12 @@
                             firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }
                     }
-                });
+
+                    const captchaResponse = grecaptcha.getResponse();
+                    if (!captchaResponse) {
+                        e.preventDefault();
+                        alert('Пожалуйста, подтвердите что вы не робот');
+                        return;
+                        });
             }
         });
