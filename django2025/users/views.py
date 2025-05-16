@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, PasswordResetConfirmForm, PasswordResetForm
 from .models import Profile
 from django.shortcuts import redirect
 from django.contrib.auth import logout as auth_logout
@@ -538,91 +538,111 @@ User = get_user_model()
 
 def password_reset_request(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        try:
-            user = User.objects.get(email=email)
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
 
-            # Генерируем код подтверждения
-            code = ''.join(random.choices(string.digits, k=6))
-            expires_at = timezone.now() + timezone.timedelta(minutes=15)
+                # Генерируем 6-значный код
+                code = ''.join(random.choices(string.digits, k=6))
+                expires_at = timezone.now() + timezone.timedelta(minutes=15)
 
-            # Создаем или обновляем запись верификации
-            verification, created = EmailVerification.objects.update_or_create(
-                email=email,
-                defaults={'code': code, 'expires_at': expires_at}
-            )
+                # Создаем или обновляем запись верификации
+                EmailVerification.objects.update_or_create(
+                    email=email,
+                    defaults={'code': code, 'expires_at': expires_at}
+                )
 
-            # Отправляем email
-            send_mail(
-                'Восстановление пароля HHabits',
-                f'Ваш код для восстановления пароля: {code}',
-                'noreply@hhabits.com',
-                [email],
-                fail_silently=False,
-            )
+                # Отправляем письмо с кодом
+                send_mail(
+                    'Восстановление пароля HHabits',
+                    f'Ваш код для сброса пароля: {code}\n\nКод действителен 15 минут.',
+                    'noreply@hhabits.com',
+                    [email],
+                    fail_silently=False,
+                )
 
-            return redirect('password_reset_confirm', email=email, code='waiting')
+                return redirect('password_reset_confirm', email=email, code='waiting')
 
-        except User.DoesNotExist:
-            messages.error(request, 'Пользователь с таким email не найден')
+            except User.DoesNotExist:
+                messages.error(request, 'Пользователь с таким email не найден')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
 
-    return render(request, 'users/password_reset.html')
+    else:
+        form = PasswordResetForm()
+
+    return render(request, 'users/password_reset.html', {'form': form})
 
 
 def password_reset_confirm(request, email, code):
     try:
         verification = EmailVerification.objects.get(email=email)
     except EmailVerification.DoesNotExist:
+        messages.error(request, 'Недействительная ссылка для сброса пароля')
         return redirect('password_reset')
 
     if request.method == 'POST':
-        if code == 'waiting':
-            # Проверяем код подтверждения
-            entered_code = request.POST.get('code')
-            if entered_code == verification.code:
-                if timezone.now() < verification.expires_at:
-                    return redirect('password_reset_confirm', email=email, code=verification.code)
+        form = PasswordResetConfirmForm(request.POST)
+        if form.is_valid():
+            if code == 'waiting':
+                # Проверка кода подтверждения
+                entered_code = form.cleaned_data['code']
+                if entered_code == verification.code:
+                    if timezone.now() < verification.expires_at:
+                        return redirect('password_reset_confirm', email=email, code=verification.code)
+                    else:
+                        messages.error(request, 'Срок действия кода истек')
                 else:
-                    messages.error(request, 'Срок действия кода истек')
+                    messages.error(request, 'Неверный код подтверждения')
             else:
-                messages.error(request, 'Неверный код подтверждения')
-        else:
-            # Устанавливаем новый пароль
-            new_password = request.POST.get('new_password')
-            confirm_password = request.POST.get('confirm_password')
+                # Установка нового пароля
+                new_password = form.cleaned_data['new_password']
 
-            if new_password != confirm_password:
-                messages.error(request, 'Пароли не совпадают')
-            else:
                 try:
-                    # Валидация пароля
-                    validate_password(new_password)
-
                     user = User.objects.get(email=email)
                     user.set_password(new_password)
                     user.save()
+
+                    # Автоматическая авторизация
+                    user = authenticate(
+                        username=user.username,
+                        password=new_password
+                    )
+                    login(request, user)
+
                     verification.delete()
+                    messages.success(request, 'Пароль успешно изменен!')
+                    return redirect('profile')
 
-                    messages.success(request, 'Пароль успешно изменен! Теперь вы можете войти.')
-                    return redirect('login')
-
-                except ValidationError as e:
-                    for error in e.messages:
-                        messages.error(request, error)
                 except Exception as e:
                     messages.error(request, 'Ошибка при изменении пароля')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
+    else:
+        # Инициализация формы с пустыми значениями
+        form = PasswordResetConfirmForm(initial={
+            'code': '',
+            'new_password': '',
+            'confirm_password': ''
+        })
 
+    # Расчет оставшегося времени
     remaining_time = verification.expires_at - timezone.now()
     remaining_seconds = max(0, int(remaining_time.total_seconds()))
-    minutes = remaining_seconds // 60
-    seconds = remaining_seconds % 60
 
     context = {
         'email': email,
         'code': code,
-        'minutes': minutes,
-        'seconds': f"{seconds:02d}",
-        'remaining_seconds': remaining_seconds
+        'minutes': remaining_seconds // 60,
+        'seconds': f"{remaining_seconds % 60:02d}",
+        'remaining_seconds': remaining_seconds,
+        'form': form,
     }
 
     return render(request, 'users/password_reset_confirm.html', context)

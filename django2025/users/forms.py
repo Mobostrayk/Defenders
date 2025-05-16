@@ -58,3 +58,63 @@ class HabitDaysForm(forms.ModelForm):
         model = UserHabit
         fields = ['monday', 'tuesday', 'wednesday', 'thursday',
                  'friday', 'saturday', 'sunday']
+
+
+class PasswordResetForm(forms.Form):
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Ваш email'
+        })
+    )
+    captcha = CaptchaField(
+        label="Капча",
+        error_messages={'invalid': 'Неправильная капча'}
+    )
+
+
+class PasswordResetConfirmForm(forms.Form):
+    code = forms.CharField(
+        label="Код подтверждения",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Введите код из письма'
+        })
+    )
+    new_password = forms.CharField(
+        label="Новый пароль",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Придумайте новый пароль'
+        })
+    )
+    confirm_password = forms.CharField(
+        label="Подтверждение пароля",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Повторите новый пароль'
+        })
+    )
+    captcha = CaptchaField(
+        label="Капча",
+        error_messages={'invalid': 'Неправильная капча'}
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if new_password and confirm_password and new_password != confirm_password:
+            raise forms.ValidationError("Пароли не совпадают")
+
+        if new_password:
+            try:
+                from django.contrib.auth.password_validation import validate_password
+                validate_password(new_password)
+            except forms.ValidationError as e:
+                raise forms.ValidationError(e.messages[0])
+
+        return cleaned_data
