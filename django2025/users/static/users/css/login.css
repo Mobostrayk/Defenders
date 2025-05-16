@@ -319,3 +319,36 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для контраста 
     width: 100%;
     margin-top: 5px;
 }
+
+.auth-messages {
+    margin-bottom: 1.5rem;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.form-note {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+#timer {
+    color: var(--primary);
+    font-weight: 500;
+}

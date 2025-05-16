@@ -3,7 +3,8 @@ from django.contrib import admin
 from django.urls import path
 
 from . import views
-from .views import profile, update_profile, delete_habit, update_avatar, update_password  # Добавляем импорт update_profile
+from .views import profile, update_profile, delete_habit, update_avatar, update_password, password_reset_confirm, password_reset_request # Добавляем импорт update_profile
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('login/', views.user_login, name='login'),
@@ -24,4 +25,7 @@ urlpatterns = [
     path('update-habit-completion/', views.update_habit_completion, name='update_habit_completion'),
     path('habit-settings/<int:habit_id>/', views.habit_settings, name='habit_settings'),
     path('habit-stats/<int:habit_id>/', views.habit_stats, name='habit_stats'),
+
+    path('password-reset/', password_reset_request, name='password_reset'),
+    path('password-reset-confirm/<str:email>/<str:code>/', password_reset_confirm, name='password_reset_confirm'),
 ]

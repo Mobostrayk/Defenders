@@ -45,6 +45,16 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils import timezone
+from .models import EmailVerification
+import random
+import string
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 
 
@@ -521,3 +531,98 @@ def update_password(request):
             return JsonResponse({'status': 'error', 'message': 'Неверный текущий пароль'})
 
     return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса'})
+
+
+User = get_user_model()
+
+
+def password_reset_request(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+
+            # Генерируем код подтверждения
+            code = ''.join(random.choices(string.digits, k=6))
+            expires_at = timezone.now() + timezone.timedelta(minutes=15)
+
+            # Создаем или обновляем запись верификации
+            verification, created = EmailVerification.objects.update_or_create(
+                email=email,
+                defaults={'code': code, 'expires_at': expires_at}
+            )
+
+            # Отправляем email
+            send_mail(
+                'Восстановление пароля HHabits',
+                f'Ваш код для восстановления пароля: {code}',
+                'noreply@hhabits.com',
+                [email],
+                fail_silently=False,
+            )
+
+            return redirect('password_reset_confirm', email=email, code='waiting')
+
+        except User.DoesNotExist:
+            messages.error(request, 'Пользователь с таким email не найден')
+
+    return render(request, 'users/password_reset.html')
+
+
+def password_reset_confirm(request, email, code):
+    try:
+        verification = EmailVerification.objects.get(email=email)
+    except EmailVerification.DoesNotExist:
+        return redirect('password_reset')
+
+    if request.method == 'POST':
+        if code == 'waiting':
+            # Проверяем код подтверждения
+            entered_code = request.POST.get('code')
+            if entered_code == verification.code:
+                if timezone.now() < verification.expires_at:
+                    return redirect('password_reset_confirm', email=email, code=verification.code)
+                else:
+                    messages.error(request, 'Срок действия кода истек')
+            else:
+                messages.error(request, 'Неверный код подтверждения')
+        else:
+            # Устанавливаем новый пароль
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+
+            if new_password != confirm_password:
+                messages.error(request, 'Пароли не совпадают')
+            else:
+                try:
+                    # Валидация пароля
+                    validate_password(new_password)
+
+                    user = User.objects.get(email=email)
+                    user.set_password(new_password)
+                    user.save()
+                    verification.delete()
+
+                    messages.success(request, 'Пароль успешно изменен! Теперь вы можете войти.')
+                    return redirect('login')
+
+                except ValidationError as e:
+                    for error in e.messages:
+                        messages.error(request, error)
+                except Exception as e:
+                    messages.error(request, 'Ошибка при изменении пароля')
+
+    remaining_time = verification.expires_at - timezone.now()
+    remaining_seconds = max(0, int(remaining_time.total_seconds()))
+    minutes = remaining_seconds // 60
+    seconds = remaining_seconds % 60
+
+    context = {
+        'email': email,
+        'code': code,
+        'minutes': minutes,
+        'seconds': f"{seconds:02d}",
+        'remaining_seconds': remaining_seconds
+    }
+
+    return render(request, 'users/password_reset_confirm.html', context)
