@@ -54,53 +54,59 @@
                 </div>
             </div>
 
-            <!-- Модальное окно настроек -->
-            <div class="settings-modal" id="settings-modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Настройки профиля</h3>
-                        <button class="close-modal" id="close-settings">&times;</button>
+          <!-- Модальное окно настроек -->
+        <div class="settings-modal" id="settings-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Настройки профиля</h3>
+                    <button class="close-modal" id="close-settings">&times;</button>
+                </div>
+
+                <!-- Форма для аватара -->
+                <form id="avatar-form" method="post" enctype="multipart/form-data" action="{% url 'update_avatar' %}">
+                    {% csrf_token %}
+                    <div class="form-section">
+                        <h4>Аватар</h4>
+                        <div class="avatar-upload">
+                            <label for="avatar-upload" class="upload-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24">
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+                                    <polyline points="16 5 22 5 22 11"></polyline>
+                                    <polyline points="21 15 15 21 9 15 3 21"></polyline>
+                                </svg>
+                                <span>Выберите файл</span>
+                                <input type="file" id="avatar-upload" name="avatar" accept="image/*">
+                            </label>
+                            <span class="file-name" id="file-name">Файл не выбран</span>
+                        </div>
+                        <p class="form-note">Максимальный размер: 2MB. Допустимые форматы: JPG, PNG.</p>
+                    </div>
+                </form>
+
+                <!-- Форма для пароля -->
+                <form id="password-form" method="post" action="{% url 'update_password' %}">
+                    {% csrf_token %}
+                    <div class="form-section">
+                        <h4>Смена пароля</h4>
+                        <div class="form-group">
+                            <input type="password" name="old_password" placeholder="Текущий пароль" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="new_password1" placeholder="Новый пароль (мин. 8 символов)" required minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="new_password2" placeholder="Повторите новый пароль" required minlength="8">
+                        </div>
+                        <p class="form-note">Пароль должен содержать минимум 8 символов.</p>
                     </div>
 
-                    <form method="post" enctype="multipart/form-data" action="{% url 'update_profile' %}" class="settings-form">
-                        {% csrf_token %}
-
-                        <div class="form-section">
-                            <h4>Аватар</h4>
-                            <div class="avatar-upload">
-                                <label for="avatar-upload" class="upload-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
-                                        <polyline points="16 5 22 5 22 11"></polyline>
-                                        <polyline points="21 15 15 21 9 15 3 21"></polyline>
-                                    </svg>
-                                    <span>Выберите файл</span>
-                                    <input type="file" id="avatar-upload" name="avatar" accept="image/*">
-                                </label>
-                                <span class="file-name" id="file-name">Файл не выбран</span>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h4>Смена пароля</h4>
-                            <div class="form-group">
-                                <input type="password" name="old_password" placeholder="Текущий пароль" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="password" name="new_password1" placeholder="Новый пароль" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="password" name="new_password2" placeholder="Повторите пароль" required>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="cancel-btn" id="cancel-settings">Отмена</button>
-                            <button type="submit" class="save-btn">Сохранить изменения</button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" id="cancel-settings">Отмена</button>
+                        <button type="submit" class="save-btn">Изменить пароль</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
             <!-- Привычки пользователя -->
             <div class="habits-section">

@@ -10,24 +10,125 @@ themeToggle.addEventListener('click', () => {
     localStorage.setItem('theme', newTheme);
 });
 
-// Управление модальным окном настроек
+// Элементы модального окна
 const settingsModal = document.getElementById('settings-modal');
 const openSettingsBtn = document.getElementById('open-settings');
 const closeSettingsBtn = document.getElementById('close-settings');
+const cancelSettingsBtn = document.getElementById('cancel-settings');
+const avatarForm = document.getElementById('avatar-form');
+const passwordForm = document.getElementById('password-form');
+const fileInput = document.getElementById('avatar-upload');
+const fileName = document.getElementById('file-name');
 
-openSettingsBtn.addEventListener('click', () => {
-    settingsModal.style.display = 'block';
-});
+// Управление модальным окном
+if (openSettingsBtn && settingsModal) {
+    openSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+    });
+}
 
-closeSettingsBtn.addEventListener('click', () => {
-    settingsModal.style.display = 'none';
-});
+if (closeSettingsBtn) {
+    closeSettingsBtn.addEventListener('click', closeModal);
+}
+
+if (cancelSettingsBtn) {
+    cancelSettingsBtn.addEventListener('click', closeModal);
+}
 
 window.addEventListener('click', (e) => {
     if (e.target === settingsModal) {
-        settingsModal.style.display = 'none';
+        closeModal();
     }
 });
+
+// Обработка выбора файла
+if (fileInput && fileName) {
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileName.textContent = fileInput.files[0].name;
+
+            // Автоматическая отправка формы при выборе файла
+            const formData = new FormData(avatarForm);
+            formData.append('avatar', fileInput.files[0]);
+
+            fetch(avatarForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Обновляем аватар на странице
+                    const avatarImg = document.querySelector('.avatar-image');
+                    if (avatarImg) {
+                        avatarImg.src = data.avatar_url + '?t=' + new Date().getTime();
+                    } else {
+                        // Если аватар был дефолтный, создаем img
+                        const placeholder = document.querySelector('.avatar-placeholder');
+                        if (placeholder) {
+                            placeholder.innerHTML = `<img src="${data.avatar_url}" alt="Аватар" class="avatar-image">`;
+                        }
+                    }
+                    showMessage('Аватар успешно обновлен', 'success');
+                } else {
+                    showMessage(data.message || 'Ошибка обновления аватара', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Ошибка загрузки аватара', 'error');
+            });
+        }
+    });
+}
+
+// Валидация и отправка формы пароля
+if (passwordForm) {
+    passwordForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const oldPassword = this.querySelector('[name="old_password"]').value;
+        const newPassword1 = this.querySelector('[name="new_password1"]').value;
+        const newPassword2 = this.querySelector('[name="new_password2"]').value;
+
+        // Валидация пароля
+        if (newPassword1.length < 8) {
+            showMessage('Пароль должен содержать минимум 8 символов', 'error');
+            return;
+        }
+
+        if (newPassword1 !== newPassword2) {
+            showMessage('Новые пароли не совпадают', 'error');
+            return;
+        }
+
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showMessage('Пароль успешно изменен', 'success');
+                this.reset();
+            } else {
+                showMessage(data.message || 'Ошибка изменения пароля', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Ошибка изменения пароля', 'error');
+        });
+    });
+}
 
 // Удаление привычек
 document.querySelectorAll('.delete-btn').forEach(btn => {
@@ -45,19 +146,41 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
             .then(data => {
                 if (data.status === 'success') {
                     this.closest('.habit-card').remove();
+                    showMessage('Привычка удалена', 'success');
                 } else {
-                    alert(data.message || 'Ошибка при удалении привычки');
+                    showMessage(data.message || 'Ошибка при удалении привычки', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Произошла ошибка при удалении привычки');
+                showMessage('Произошла ошибка при удалении привычки', 'error');
             });
         }
     });
 });
 
-// Функция для получения CSRF токена
+// Вспомогательные функции
+function closeModal() {
+    settingsModal.style.display = 'none';
+}
+
+function showMessage(text, type) {
+    // Удаляем предыдущие сообщения
+    const oldMessages = document.querySelectorAll('.alert-message');
+    oldMessages.forEach(msg => msg.remove());
+
+    const message = document.createElement('div');
+    message.className = `alert-message ${type}`;
+    message.textContent = text;
+
+    document.body.appendChild(message);
+
+    setTimeout(() => {
+        message.classList.add('fade-out');
+        setTimeout(() => message.remove(), 500);
+    }, 3000);
+}
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

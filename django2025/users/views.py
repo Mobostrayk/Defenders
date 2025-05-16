@@ -481,3 +481,43 @@ def update_profile(request):
 
     return redirect('profile')
 
+
+@login_required
+def update_avatar(request):
+    if request.method == 'POST' and request.FILES.get('avatar'):
+        profile = request.user.profile
+        profile.avatar = request.FILES['avatar']
+        profile.save()
+        return JsonResponse({
+            'status': 'success',
+            'avatar_url': profile.avatar.url
+        })
+    return JsonResponse({'status': 'error', 'message': 'Неверный запрос'})
+
+
+@login_required
+def update_password(request):
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+
+        if not (old_password and new_password1 and new_password2):
+            return JsonResponse({'status': 'error', 'message': 'Заполните все поля'})
+
+        if new_password1 != new_password2:
+            return JsonResponse({'status': 'error', 'message': 'Пароли не совпадают'})
+
+        if len(new_password1) < 8:
+            return JsonResponse({'status': 'error', 'message': 'Пароль должен содержать минимум 8 символов'})
+
+        user = request.user
+        if user.check_password(old_password):
+            user.set_password(new_password1)
+            user.save()
+            update_session_auth_hash(request, user)
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Неверный текущий пароль'})
+
+    return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса'})
