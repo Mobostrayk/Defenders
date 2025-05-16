@@ -711,3 +711,19 @@ body {
         transform: translateY(0);
     }
 }
+
+info-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.info-note svg {
+    flex-shrink: 0;
+    stroke-width: 2;
+}

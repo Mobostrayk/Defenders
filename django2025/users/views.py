@@ -340,7 +340,7 @@ def update_habit_completion(request):
             tz = pytz.timezone(settings.TIME_ZONE)
             now = timezone.now().astimezone(tz)
             today = now.date()
-            yesterday = today - timedelta(days=1)
+            last_allowed_date = today - timedelta(days=6)  # Разрешаем отмечать за последние 7 дней
 
             date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
             user_habit = UserHabit.objects.get(id=habit_id, user=request.user)
@@ -350,10 +350,10 @@ def update_habit_completion(request):
                 return JsonResponse(
                     {'status': 'error', 'message': 'Нельзя отмечать привычки за будущие даты'})
 
-            # Проверяем что дата не раньше вчерашнего дня
-            if date < yesterday:
+            # Проверяем что дата не раньше чем 6 дней назад
+            if date < last_allowed_date:
                 return JsonResponse(
-                    {'status': 'error', 'message': 'Можно отмечать привычки только за сегодня или вчера'})
+                    {'status': 'error', 'message': 'Можно отмечать привычки только за последние 7 дней'})
 
             # Проверяем что привычка должна выполняться в этот день
             selected_days = user_habit.get_selected_days()
