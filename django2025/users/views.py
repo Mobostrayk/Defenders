@@ -41,6 +41,11 @@ from .models import EmailVerification, User
 from captcha.fields import CaptchaField
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib import messages
+from django.shortcuts import redirect
+
 
 
 def registration(request):
@@ -429,4 +434,50 @@ def habit_stats(request, habit_id):
         'completions': completions[:30]  # Последние 30 дней
     })
 
+
+@login_required
+def delete_habit(request, habit_id):
+    if request.method == 'POST':
+        try:
+            user_habit = UserHabit.objects.get(id=habit_id, user=request.user)
+            user_habit.delete()
+            return JsonResponse({'status': 'success'})
+        except UserHabit.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Привычка не найдена'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса'})
+
+
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        # Обработка аватара
+        if 'avatar' in request.FILES:
+            profile = Profile.objects.get(user=request.user)
+            profile.avatar = request.FILES['avatar']
+            profile.save()
+            messages.success(request, 'Аватар успешно обновлен')
+
+        # Обработка смены пароля
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+
+        if old_password and new_password1 and new_password2:
+            if new_password1 != new_password2:
+                messages.error(request, 'Новые пароли не совпадают')
+            else:
+                user = request.user
+                if user.check_password(old_password):
+                    user.set_password(new_password1)
+                    user.save()
+                    update_session_auth_hash(request, user)  # Чтобы пользователь не разлогинился
+                    messages.success(request, 'Пароль успешно изменен')
+                else:
+                    messages.error(request, 'Неверный текущий пароль')
+
+        return redirect('profile')
+
+    return redirect('profile')
 
