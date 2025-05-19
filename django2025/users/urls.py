@@ -26,6 +26,6 @@ urlpatterns = [
     path('habit-settings/<int:habit_id>/', views.habit_settings, name='habit_settings'),
     path('habit-stats/<int:habit_id>/', views.habit_stats, name='habit_stats'),
 
-    path('password-reset/', password_reset_request, name='password_reset'),
-    path('password-reset-confirm/<str:email>/<str:code>/', password_reset_confirm, name='password_reset_confirm'),
+    path('password-reset/', views.password_reset_request, name='password_reset'),
+    path('password-reset-confirm/<str:email>/', views.password_reset_confirm, name='password_reset_confirm'),
 ]

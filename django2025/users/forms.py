@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from .models import UserHabit
 from django import forms
 from captcha.fields import CaptchaField
+from django.contrib.auth.forms import PasswordResetForm as DjangoPasswordResetForm
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -60,7 +61,7 @@ class HabitDaysForm(forms.ModelForm):
                  'friday', 'saturday', 'sunday']
 
 
-class PasswordResetForm(forms.Form):
+class PasswordResetForm(DjangoPasswordResetForm):
     email = forms.EmailField(
         label="Email",
         widget=forms.EmailInput(attrs={
@@ -69,52 +70,41 @@ class PasswordResetForm(forms.Form):
         })
     )
     captcha = CaptchaField(
-        label="Капча",
-        error_messages={'invalid': 'Неправильная капча'}
+        label="Подтвердите что вы не робот",
+        error_messages={'invalid': 'Неверная капча'}
     )
-
 
 class PasswordResetConfirmForm(forms.Form):
     code = forms.CharField(
-        label="Код подтверждения",
-        required=False,
+        label="Код из письма",
+        max_length=6,
         widget=forms.TextInput(attrs={
             'class': 'form-input',
-            'placeholder': 'Введите код из письма'
+            'placeholder': '6-значный код'
         })
     )
     new_password = forms.CharField(
         label="Новый пароль",
         widget=forms.PasswordInput(attrs={
             'class': 'form-input',
-            'placeholder': 'Придумайте новый пароль'
-        })
+            'placeholder': 'Минимум 8 символов'
+        }),
+        min_length=8
     )
     confirm_password = forms.CharField(
-        label="Подтверждение пароля",
+        label="Повторите пароль",
         widget=forms.PasswordInput(attrs={
             'class': 'form-input',
-            'placeholder': 'Повторите новый пароль'
+            'placeholder': 'Повторите пароль'
         })
     )
     captcha = CaptchaField(
-        label="Капча",
-        error_messages={'invalid': 'Неправильная капча'}
+        label="Подтвердите что вы не робот",
+        error_messages={'invalid': 'Неверная капча'}
     )
 
     def clean(self):
         cleaned_data = super().clean()
-        new_password = cleaned_data.get('new_password')
-        confirm_password = cleaned_data.get('confirm_password')
-
-        if new_password and confirm_password and new_password != confirm_password:
-            raise forms.ValidationError("Пароли не совпадают")
-
-        if new_password:
-            try:
-                from django.contrib.auth.password_validation import validate_password
-                validate_password(new_password)
-            except forms.ValidationError as e:
-                raise forms.ValidationError(e.messages[0])
-
+        if cleaned_data.get('new_password') != cleaned_data.get('confirm_password'):
+            self.add_error('confirm_password', 'Пароли не совпадают')
         return cleaned_data
