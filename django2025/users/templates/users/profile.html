@@ -118,7 +118,7 @@
                 <div class="achievements-grid">
                     {% for achievement in achievements %}
                         <div class="achievement-card{% if achievement.unlocked_at %} unlocked{% endif %}">
-                            <img src="{{ achievement.icon.url }}" alt="{{ achievement.name }}" class="achievement-icon">
+                            <img src="{% static achievement.icon %}" alt="{{ achievement.name }}">
                             <h3>{{ achievement.name }}</h3>
                             <p>{{ achievement.description }}</p>
                         </div>

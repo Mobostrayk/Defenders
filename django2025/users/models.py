@@ -108,18 +108,17 @@ class EmailVerification(models.Model):
             expires_at=timezone.now() + timezone.timedelta(minutes=5)
         )
 
+
 class Achievement(models.Model):
     name = models.CharField("Название", max_length=100)
     description = models.TextField("Описание")
-    icon = models.ImageField("Иконка", upload_to='achievements/')
+
+    # Меняем ImageField на CharField:
+    icon = models.CharField("Иконка", max_length=255)
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     unlocked_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.name}"
-
-    class Meta:
-        verbose_name = "Достижение"
-        verbose_name_plural = "Достижения"
-        unique_together = ('name', 'user')
 

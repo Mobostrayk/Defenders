@@ -17,7 +17,7 @@ def check_achievements(user):
                 user=user,
                 name="Первый шаг",
                 description="Заведите свою первую привычку",
-                icon="default_icons/first_step.png"
+                icon="users/achievements/first_step.png"
             )
 
     # 2. Неделя успеха — Выполнить 7 дней подряд
@@ -35,7 +35,7 @@ def check_achievements(user):
                 user=user,
                 name="Неделя успеха",
                 description="Выполнить 7 дней подряд",
-                icon="default_icons/week_streak.png"
+                icon="users/achievements/week_streak.png"
             )
 
     # 3. Месяц непрерывности — 30 дней с отметками
@@ -46,7 +46,7 @@ def check_achievements(user):
                 user=user,
                 name="Месяц непрерывности",
                 description="Отметить привычки 30 дней за весь период",
-                icon="default_icons/month_streak.png"
+                icon="users/achievements/month_streak.png"
             )
 
     # 4. Мастер привычек — 5 активных привычек
@@ -57,37 +57,9 @@ def check_achievements(user):
                 user=user,
                 name="Мастер привычек",
                 description="Создать 5 активных привычек",
-                icon="default_icons/master_habits.png"
+                icon="users/achievements/master_habits.png"
             )
 
-    # 5. Абсолютный чистильщик — 100% выполнения всех привычек за неделю
-    if not Achievement.objects.filter(user=user, name="Абсолютный чистильщик").exists():
-        tz = timezone.get_current_timezone()
-        today = timezone.now().astimezone(tz).date()
-        week_start = today - timedelta(days=today.weekday())
-
-        days_in_week = [week_start + timedelta(days=i) for i in range(7)]
-        all_completed = True
-
-        for day in days_in_week:
-            user_habits = user.userhabit_set.all()
-            completed_count = sum(
-                1 for uh in user_habits
-                if HabitCompletion.objects.filter(user_habit=uh, date=day, completed=True).exists()
-            )
-            total_count = len(user_habits)
-
-            if completed_count < total_count:
-                all_completed = False
-                break
-
-        if all_completed:
-            Achievement.objects.create(
-                user=user,
-                name="Абсолютный чистильщик",
-                description="Выполнить все привычки без пропусков в течение недели",
-                icon="default_icons/cleaner.png"
-            )
 
     # 6. Легенда — 100 дней без пропусков
     if not Achievement.objects.filter(user=user, name="Легенда").exists():
@@ -102,7 +74,7 @@ def check_achievements(user):
                 user=user,
                 name="Легенда",
                 description="100 дней без пропусков",
-                icon="default_icons/legend.png"
+                icon="users/achievements/legend.png"
             )
 
     # 7. Универсальный герой — выполнять привычки в выходные
@@ -113,7 +85,7 @@ def check_achievements(user):
                 user=user,
                 name="Универсальный герой",
                 description="Выполнить любую привычку в выходной день",
-                icon="default_icons/weekend_hero.png"
+                icon="users/achievements/weekend_hero.png"
             )
 
     # 8. Ранняя пташка — выполнение до 9 утра
@@ -126,5 +98,5 @@ def check_achievements(user):
                 user=user,
                 name="Ранняя пташка",
                 description="Выполнить привычку до 9:00",
-                icon="default_icons/early_bird.png"
+                icon="users/achievements/early_bird.png"
             )
