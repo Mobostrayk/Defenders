@@ -729,26 +729,6 @@ body {
     color: var(--text-secondary);
 }
 
-.edit-avatar-btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 30px;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    font-weight: 600;
-}
-
-.edit-avatar-btn:hover {
-    background: var(--primary-hover);
-    transform: translateY(-2px);
-}
 
 .profile-info {
     width: 100%;
@@ -782,20 +762,285 @@ body {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.edit-avatar-btn {
-    background: var(--primary-color);
-    color: white; /* Белый текст всегда (хорошо контрастирует с primary-color) */
-    border: none;
-    padding: 8px 16px;
-    border-radius: 25px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+.alert-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    animation: fade-in 0.3s forwards;
 }
-[data-theme="dark"] .edit-avatar-btn {
-    background: var(--primary-dark);
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.settings-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    animation: fadeInUp 0.3s forwards;
+    position: relative;
+    border: 1px solid var(--glass-border);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.close-modal {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dark);
+}
+.form-section h4 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+.form-group input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+}
+.file-name {
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    opacity: 0.7;
+    margin-left: 1rem;
+}
+.upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.upload-btn:hover {
+    background: var(--primary-hover);
+}
+.alert-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    animation: fade-in 0.3s forwards;
+}
+.alert-message.success { background: #10b981; }
+.alert-message.error { background: #ef4444; }
+.alert-message.fade-out { animation: fade-out 0.5s forwards; }
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+/* === Кнопка "Изменить настройки профиля" === */
+.edit-avatar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--primary);
+    color: white; /* Текст остаётся белым, но фон делает его видимым */
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    position: relative;
+    z-index: 1;
+    margin-top: -160px; /* Поднимаем над аватаркой */
+    margin-bottom: 2rem;
+}
+
+.edit-avatar-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .edit-avatar-btn {
+        margin-top: -120px;
+    }
+}
+
+/* === Модальное окно настроек === */
+.settings-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow);
+    animation: fadeInUp 0.3s forwards;
+    position: relative;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.close-modal {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* === Формы внутри модального окна === */
+.form-group input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+}
+
+/* === Кнопки формы пароля === */
+.save-btn,
+.cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.save-btn {
+    background: #10b981;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.cancel-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* ===== Гарантированно работающая кнопка ===== */
+.edit-profile-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 30px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+    position: relative !important;
+    z-index: 2 !important;
+
+}
+
+.edit-profile-btn:hover {
+    background: var(--primary-hover) !important;
+    transform: translateY(-2px) !important;
+}
+
+@media (max-width: 768px) {
+    .edit-profile-btn {
+        margin-top: -100px !important;
+        font-size: 0.9rem !important;
+        padding: 0.7rem 1.2rem !important;
+    }
 }

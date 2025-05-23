@@ -1,9 +1,7 @@
 // Переключение темы
 const themeToggle = document.getElementById('theme-toggle');
 const currentTheme = localStorage.getItem('theme') || 'light';
-
 document.documentElement.setAttribute('data-theme', currentTheme);
-
 themeToggle.addEventListener('click', () => {
     const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
@@ -15,146 +13,157 @@ const settingsModal = document.getElementById('settings-modal');
 const openSettingsBtn = document.getElementById('open-settings');
 const closeSettingsBtn = document.getElementById('close-settings');
 const cancelSettingsBtn = document.getElementById('cancel-settings');
+
+// Формы
 const avatarForm = document.getElementById('avatar-form');
 const passwordForm = document.getElementById('password-form');
+
+// Элементы формы аватара
 const fileInput = document.getElementById('avatar-upload');
 const fileName = document.getElementById('file-name');
+const avatarPreview = document.getElementById('avatar-preview');
 
-// Управление модальным окном
-if (openSettingsBtn && settingsModal) {
+// Открытие/закрытие модального окна
+if (openSettingsBtn) {
     openSettingsBtn.addEventListener('click', () => {
         settingsModal.style.display = 'flex';
     });
 }
-
 if (closeSettingsBtn) {
     closeSettingsBtn.addEventListener('click', closeModal);
 }
-
 if (cancelSettingsBtn) {
     cancelSettingsBtn.addEventListener('click', closeModal);
 }
-
-window.addEventListener('click', (e) => {
-    if (e.target === settingsModal) {
-        closeModal();
-    }
+window.addEventListener('click', e => {
+    if (e.target === settingsModal) closeModal();
 });
 
-// Обработка выбора файла
-if (fileInput && fileName) {
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            fileName.textContent = fileInput.files[0].name;
+// Предпросмотр аватара
+if (fileInput && fileName && avatarPreview) {
+    fileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-            // Автоматическая отправка формы при выборе файла
-            const formData = new FormData(avatarForm);
-            formData.append('avatar', fileInput.files[0]);
+        fileName.textContent = file.name;
 
-            fetch(avatarForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Обновляем аватар на странице
-                    const avatarImg = document.querySelector('.avatar-image');
-                    if (avatarImg) {
-                        avatarImg.src = data.avatar_url + '?t=' + new Date().getTime();
-                    } else {
-                        // Если аватар был дефолтный, создаем img
-                        const placeholder = document.querySelector('.avatar-placeholder');
-                        if (placeholder) {
-                            placeholder.innerHTML = `<img src="${data.avatar_url}" alt="Аватар" class="avatar-image">`;
-                        }
-                    }
-                    showMessage('Аватар успешно обновлен', 'success');
-                } else {
-                    showMessage(data.message || 'Ошибка обновления аватара', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('Ошибка загрузки аватара', 'error');
-            });
-        }
-    });
-}
+        const reader = new FileReader();
+        reader.onload = ev => {
+            if (avatarPreview.tagName === 'IMG') {
+                avatarPreview.src = ev.target.result;
+            } else {
+                avatarPreview.innerHTML = `<img src="${ev.target.result}" alt="Аватар" class="avatar-image">`;
+            }
+        };
+        reader.readAsDataURL(file);
 
-// Валидация и отправка формы пароля
-if (passwordForm) {
-    passwordForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const oldPassword = this.querySelector('[name="old_password"]').value;
-        const newPassword1 = this.querySelector('[name="new_password1"]').value;
-        const newPassword2 = this.querySelector('[name="new_password2"]').value;
-
-        // Валидация пароля
-        if (newPassword1.length < 8) {
-            showMessage('Пароль должен содержать минимум 8 символов', 'error');
-            return;
-        }
-
-        if (newPassword1 !== newPassword2) {
-            showMessage('Новые пароли не совпадают', 'error');
-            return;
-        }
-
-        const formData = new FormData(this);
-
-        fetch(this.action, {
+        // Автоматическая отправка
+        const formData = new FormData(avatarForm);
+        fetch(avatarForm.action, {
             method: 'POST',
             body: formData,
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                showMessage('Пароль успешно изменен', 'success');
-                this.reset();
-            } else {
-                showMessage(data.message || 'Ошибка изменения пароля', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('Ошибка изменения пароля', 'error');
-        });
+        }).then(res => res.json())
+          .then(data => {
+              if (data.status === 'success') showMessage('Аватар обновлён', 'success');
+              else showMessage(data.message || 'Ошибка обновления аватара', 'error');
+          })
+          .catch(() => showMessage('Ошибка загрузки аватара', 'error'));
     });
 }
 
-// Удаление привычек
+// Валидация пароля
+function validatePassword(password) {
+    let errors = [];
+    if (password.length < 8) {
+        errors.push('Пароль должен содержать минимум 8 символов');
+    }
+    if (!/[A-Z]/.test(password)) {
+        errors.push('Добавьте хотя бы одну заглавную букву');
+    }
+    if (!/\d/.test(password)) {
+        errors.push('Добавьте хотя бы одну цифру');
+    }
+    if (/^(.)\1+$/.test(password)) {
+        errors.push('Слишком простой пароль');
+    }
+    return errors;
+}
+
+// Отправка формы пароля
+if (passwordForm) {
+    passwordForm.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const oldPass = passwordForm.querySelector('[name="old_password"]').value.trim();
+        const newPass1 = passwordForm.querySelector('[name="new_password1"]').value.trim();
+        const newPass2 = passwordForm.querySelector('[name="new_password2"]').value.trim();
+
+        clearError(passwordForm.querySelector('[name="old_password"]'), document.getElementById('old-password-error'));
+        clearError(passwordForm.querySelector('[name="new_password1"]'), document.getElementById('new-password-error'));
+        clearError(passwordForm.querySelector('[name="new_password2"]'), document.getElementById('password2-error'));
+
+        let isValid = true;
+
+        if (!oldPass) {
+            showError(passwordForm.querySelector('[name="old_password"]'), document.getElementById('old-password-error'), 'Введите текущий пароль');
+            isValid = false;
+        }
+
+        const passErrors = validatePassword(newPass1);
+        if (passErrors.length > 0) {
+            showError(passwordForm.querySelector('[name="new_password1"]'), document.getElementById('new-password-error'), passErrors.join('<br>'));
+            isValid = false;
+        }
+
+        if (newPass1 !== newPass2) {
+            showError(passwordForm.querySelector('[name="new_password2"]'), document.getElementById('password2-error'), 'Пароли не совпадают');
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        const formData = new FormData(passwordForm);
+        fetch(passwordForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).then(res => res.json())
+          .then(data => {
+              if (data.status === 'success') {
+                  showMessage('Пароль изменен', 'success');
+                  passwordForm.reset();
+              } else {
+                  showMessage(data.message || 'Ошибка изменения пароля', 'error');
+              }
+          }).catch(() => showMessage('Ошибка изменения пароля', 'error'));
+    });
+}
+
+// Удаление привычки
 document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const habitId = this.getAttribute('data-habit-id');
-        if (confirm('Вы уверены, что хотите удалить эту привычку?')) {
+    btn.addEventListener('click', () => {
+        const habitId = btn.getAttribute('data-habit-id');
+        if (confirm('Вы уверены?')) {
             fetch(`/habits/delete/${habitId}/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken'),
                     'Content-Type': 'application/json'
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    this.closest('.habit-card').remove();
-                    showMessage('Привычка удалена', 'success');
-                } else {
-                    showMessage(data.message || 'Ошибка при удалении привычки', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('Произошла ошибка при удалении привычки', 'error');
-            });
+            }).then(res => res.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      btn.closest('.habit-card').remove();
+                      showMessage('Привычка удалена', 'success');
+                  } else {
+                      showMessage(data.message || 'Ошибка удаления', 'error');
+                  }
+              }).catch(() => showMessage('Ошибка удаления', 'error'));
         }
     });
 });
@@ -165,33 +174,34 @@ function closeModal() {
 }
 
 function showMessage(text, type) {
-    // Удаляем предыдущие сообщения
-    const oldMessages = document.querySelectorAll('.alert-message');
-    oldMessages.forEach(msg => msg.remove());
+    const oldMsg = document.querySelector('.alert-message');
+    if (oldMsg) oldMsg.remove();
 
-    const message = document.createElement('div');
-    message.className = `alert-message ${type}`;
-    message.textContent = text;
-
-    document.body.appendChild(message);
+    const msg = document.createElement('div');
+    msg.className = `alert-message ${type}`;
+    msg.innerHTML = text;
+    document.body.appendChild(msg);
 
     setTimeout(() => {
-        message.classList.add('fade-out');
-        setTimeout(() => message.remove(), 500);
+        msg.classList.add('fade-out');
+        setTimeout(() => msg.remove(), 500);
     }, 3000);
 }
 
+function showError(input, errorDiv, message) {
+    input.classList.add('is-invalid');
+    errorDiv.innerHTML = message;
+    errorDiv.style.display = 'block';
+}
+
+function clearError(input, errorDiv) {
+    input.classList.remove('is-invalid');
+    errorDiv.innerHTML = '';
+    errorDiv.style.display = 'none';
+}
+
 function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
+    const value = '; ' + document.cookie;
+    const parts = value.split('; ' + name + '=');
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';')[0]);
 }
