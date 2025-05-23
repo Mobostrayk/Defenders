@@ -112,7 +112,21 @@
                     </form>
                 </div>
             </div>
-
+            <!-- Достижения -->
+            <div class="achievements-section">
+                <h2 class="achievements-title">Достижения</h2>
+                <div class="achievements-grid">
+                    {% for achievement in achievements %}
+                        <div class="achievement-card{% if achievement.unlocked_at %} unlocked{% endif %}">
+                            <img src="{{ achievement.icon.url }}" alt="{{ achievement.name }}" class="achievement-icon">
+                            <h3>{{ achievement.name }}</h3>
+                            <p>{{ achievement.description }}</p>
+                        </div>
+                    {% empty %}
+                        <p>Нет достижений</p>
+                    {% endfor %}
+                </div>
+            </div>
             <!-- Привычки пользователя -->
             <div class="habits-section">
                 <h2 class="habits-title">Ваши привычки</h2>

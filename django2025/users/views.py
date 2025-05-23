@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
 from .forms import RegisterForm, LoginForm, PasswordResetConfirmForm, PasswordResetForm
-from .models import Profile
+from .models import Profile, Achievement
 from django.shortcuts import redirect
 from django.contrib.auth import logout as auth_logout
 from django.shortcuts import render, get_object_or_404, redirect
@@ -55,7 +55,7 @@ import random
 import string
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-
+from users.utils import check_achievements
 
 
 def registration(request):
@@ -206,14 +206,16 @@ def check_email(request):
 
 @login_required
 def profile(request):
-    # Получаем профиль пользователя
-    user_profile = Profile.objects.get(user=request.user)
-    # Получаем все привычки пользователя
-    user_habits = UserHabit.objects.filter(user=request.user).select_related('habit')
+    user = request.user
+    check_achievements(user)  # Эта функция ищет достижения и добавляет новые
+    user_profile = Profile.objects.get(user=user)
+    user_habits = UserHabit.objects.filter(user=user).select_related('habit')
+    achievements = Achievement.objects.filter(user=user)
 
     return render(request, 'users/profile.html', {
-        'profile': user_profile,  # Передаем профиль
-        'user_habits': user_habits,  # Передаем привычки
+        'profile': user_profile,
+        'user_habits': user_habits,
+        'achievements': achievements,
     })
 
 

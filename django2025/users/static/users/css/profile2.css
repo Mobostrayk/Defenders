@@ -1044,3 +1044,45 @@ body {
         padding: 0.7rem 1.2rem !important;
     }
 }
+/* ===== Достижения ===== */
+.achievements-section {
+    margin-top: 2rem;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.achievement-card {
+    background-color: var(--glass);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.achievement-card:hover {
+    transform: translateY(-5px);
+}
+
+.achievement-card img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.5rem;
+    object-fit: contain;
+}
+
+.achievement-card h3 {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    color: var(--text);
+}
+
+.achievement-card p {
+    font-size: 0.8rem;
+    color: var(--text-dark);
+}

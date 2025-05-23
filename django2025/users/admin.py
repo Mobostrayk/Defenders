@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.utils import timezone
 from .models import Profile, Habit, UserHabit, EmailVerification
+from django.contrib import admin
+from .models import Achievement, Profile, UserHabit, HabitCompletion, EmailVerification
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
@@ -121,3 +123,12 @@ class EmailVerificationAdmin(admin.ModelAdmin):
         expired_count = queryset.filter(expires_at__lt=timezone.now()).count()
         queryset.filter(expires_at__lt=timezone.now()).delete()
         self.message_user(request, f'Удалено {expired_count} истёкших записей')
+
+
+
+# Регистрация модели достижений
+@admin.register(Achievement)
+class AchievementAdmin(admin.ModelAdmin):
+    list_display = ('user', 'name', 'unlocked_at')
+    search_fields = ('name', 'user__username')
+    list_filter = ('unlocked_at',)
