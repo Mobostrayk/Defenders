@@ -730,21 +730,23 @@ body {
 }
 
 .edit-avatar-btn {
-    background: var(--primary-color);
+    background: var(--primary);
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 25px;
-    font-size: 14px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.6rem;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    font-weight: 600;
 }
 
 .edit-avatar-btn:hover {
-    background: var(--primary-dark);
+    background: var(--primary-hover);
     transform: translateY(-2px);
 }
 

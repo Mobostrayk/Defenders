@@ -1,10 +1,11 @@
 {% extends 'users/base.html' %}
 {% load static %}
-
 {% block title %}HHabits - Статистика привычки{% endblock %}
 
 {% block content %}
     <div class="background"></div>
+
+    <!-- Кнопка переключения темы -->
     <button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
         <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
             <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
@@ -16,6 +17,7 @@
         <div class="glass-container">
             <h1 class="stats-title">Статистика: {{ user_habit.habit.name }}</h1>
 
+            <!-- Блок статистики -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value">{{ completed_days }}</div>
@@ -35,16 +37,19 @@
                 </div>
             </div>
 
+            <!-- Календарь за последние 30 дней -->
             <div class="calendar-section">
                 <h3>Последние 30 дней</h3>
                 <div class="calendar-grid">
                     {% for completion in completions %}
                         <div class="calendar-day {% if completion.completed %}completed{% endif %}"
                              title="{{ completion.date|date:'d.m.Y' }} - {% if completion.completed %}Выполнено{% else %}Не выполнено{% endif %}">
-                            {{ completion.date|date:"d" }}
+                            <span>{{ completion.date|date:"d" }}<br><small>{{ completion.date|date:"b"|slice:":3" }}</small></span>
                         </div>
                     {% endfor %}
                 </div>
+
+                <!-- Легенда -->
                 <div class="calendar-legend">
                     <div class="legend-item">
                         <span class="legend-color completed"></span>
@@ -57,34 +62,35 @@
                 </div>
             </div>
 
-            <div class="back-link">
-                <a href="{% url 'track_habits' %}" class="back-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M19 12H5M12 19l-7-7 7-7"/>
-                    </svg>
-                    Назад к трекеру
-                </a>
-            </div>
-        </div>
-        <div class="calendar-day {% if completion.completed %}completed{% endif %}"
-     title="{{ completion.date|date:'d.m.Y' }} - {% if completion.completed %}Выполнено{% else %}Не выполнено{% endif %}">
-    <span>{{ completion.date|date:"d" }}</span>
-</div>
-    </main>
+          <!-- Навигация назад -->
+    <div class="back-link" style="display: flex; justify-content: center; gap: 1rem;">
+        <a href="{% url 'track_habits' %}" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Назад к трекеру
+        </a>
+        <a href="{% url 'profile' %}" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Назад в профиль
+        </a>
+    </div>
 
-<script>
-       const themeToggle = document.getElementById('theme-toggle');
+    <!-- JS для переключения темы -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
         const currentTheme = localStorage.getItem('theme') || 'light';
-
         document.documentElement.setAttribute('data-theme', currentTheme);
-
         themeToggle.addEventListener('click', () => {
             const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         });
-</script>
-Подключаем CSS -->
-    <link rel="stylesheet" href="{% static 'users/css/habit_status.css' %}">
+    </script>
 
+    <!-- Подключение CSS -->
+    <link rel="stylesheet" href="{% static 'users/css/habit_status.css' %}">
 {% endblock %}
