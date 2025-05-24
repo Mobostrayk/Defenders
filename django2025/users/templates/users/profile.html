@@ -37,12 +37,15 @@
                     <!-- Кнопка "Изменить настройки профиля" -->
                 <div class="profile-actions">
                     <button class="edit-profile-btn" id="open-settings">
-                        <svg width="18" height="18" viewBox="0 0 24 24">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
-                        Изменить настройки профиля
-                    </button>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+         stroke-width="1.5" stroke="currentColor" width="20" height="20">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16.862 4.487a2.25 2.25 0 113.182 3.182L7.5 20.182H4.5v-3L16.862 4.487z" />
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M18 2.25l3.75 3.75" />
+    </svg>
+    Изменить настройки профиля
+</button>
                 </div>
 
                 <div class="profile-info">
@@ -137,16 +140,41 @@
                                 <div class="habit-header">
                                     <h3 class="habit-name">{{ user_habit.habit.name }}</h3>
                                     <div class="habit-actions">
-                                        <a href="{% url 'habit_stats' user_habit.id %}" class="stats-btn" title="Статистика">
-                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
-                                        </a>
-                                        <a href="{% url 'habit_settings' user_habit.id %}" class="settings-btn" title="Настройки">
-                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 1 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1-1.51A1.65 1.65 0 0 0 3 9V3a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0z"/></svg>
-                                        </a>
-                                        <button class="delete-btn" title="Удалить" data-habit-id="{{ user_habit.id }}">
-                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                        </button>
-                                    </div>
+    <!-- Статистика -->
+    <a href="{% url 'habit_stats' user_habit.id %}" class="stats-btn" title="Статистика">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+             stroke-width="1.5" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 3v18h18M16 17V10M12 17V4M8 17v-7" />
+        </svg>
+    </a>
+
+    <!-- Настройки -->
+    <a href="{% url 'habit_settings' user_habit.id %}" class="settings-btn" title="Настройки">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+             stroke-width="1.5" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066
+                     c1.542-.943 3.31.825 2.368 2.367a1.724 1.724 0 001.065 2.574c1.756.426
+                     1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.943 1.542-.825 3.31-2.367
+                     2.368a1.724 1.724 0 00-2.574 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724
+                     1.724 0 00-2.573-1.066c-1.542.943-3.31-.825-2.368-2.367a1.724 1.724
+                     0 00-1.065-2.574c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573
+                     c-.943-1.542.825-3.31 2.367-2.368.996.608 2.296.07 2.574-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    </a>
+
+    <!-- Удалить -->
+    <button class="delete-btn" title="Удалить" data-habit-id="{{ user_habit.id }}">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+             stroke-width="1.5" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M6 18V8m12 10V8m-9-3h6m2 0a2 2 0 012 2v0a2 2 0 01-2 2H7a2 2 0 01-2-2v0a2 2 0 012-2h10z" />
+        </svg>
+    </button>
+</div>
                                 </div>
                             </div>
                         {% endfor %}

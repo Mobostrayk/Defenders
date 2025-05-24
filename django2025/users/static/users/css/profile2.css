@@ -1086,3 +1086,21 @@ body {
     font-size: 0.8rem;
     color: var(--text-dark);
 }
+.habit-actions svg {
+    stroke: var(--primary);
+    transition: stroke 0.3s ease;
+}
+
+.habit-actions svg:hover {
+    stroke: white;
+}
+
+.edit-profile-btn svg {
+    stroke: white;
+    transition: stroke 0.3s ease;
+}
+
+.edit-profile-btn:hover svg {
+    stroke: #e0e7ff; /* светлый оттенок при наведении */
+}
+
