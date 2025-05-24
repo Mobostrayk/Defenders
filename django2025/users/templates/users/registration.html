@@ -1,4 +1,4 @@
-{% extends 'users/base.html' %}
+{% extends 'main/layout.html' %}
 
 {% load static %}
 {% load form_tags %}
@@ -6,311 +6,97 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
+<!-- Анимированный фон -->
 <div class="background"></div>
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header text-center">
-                    <h4>Регистрация</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" id="registration-form">
-                        {% csrf_token %}
-                        {{ form.non_field_errors }}
+<button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+    <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+        <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+        <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+    </svg>
+</button>
 
-                        <!-- Поле username -->
-                        <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
-                            {{ form.username|add_class:"form-control" }}
-                            <div class="invalid-feedback" id="username-error" style="display: none;"></div>
-                            {{ form.username.errors }}
-                        </div>
+<!-- Основной контент -->
+<main class="main-content">
+    <div class="glass-container auth-container">
+        <h1 class="auth-title">Регистрация</h1>
 
-                        <!-- Поле email с динамической проверкой -->
-                        <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
-                            {{ form.email|add_class:"form-control" }}
-                            <div class="invalid-feedback" id="email-error" style="display: none;"></div>
-                            {{ form.email.errors }}
-                        </div>
+        <form method="post" id="registration-form" class="auth-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
-                        <!-- Поле password1 -->
-                        <div class="mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
-                            <div class="input-group">
-                                {{ form.password1|add_class:"form-control" }}
-                                <button type="button" class="btn btn-outline-primary toggle-password" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="invalid-feedback" id="password-error" style="display: none;"></div>
-                            {{ form.password1.errors }}
-                        </div>
-
-                        <!-- Поле password2 -->
-                        <div class="mb-3">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
-                            <div class="input-group">
-                                {{ form.password2|add_class:"form-control" }}
-                                <button type="button" class="btn btn-outline-primary toggle-password" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="invalid-feedback" id="password2-error" style="display: none;"></div>
-                            {{ form.password2.errors }}
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <p class="mb-0">Уже есть аккаунт? <a href="{% url 'login' %}">Войдите</a>.</p>
-                </div>
+            <!-- Поле username -->
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                {{ form.username|add_class:"form-input" }}
+                <div class="invalid-feedback" id="username-error" style="display: none;"></div>
+                {{ form.username.errors }}
             </div>
-        </div>
+
+            <!-- Поле email -->
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                {{ form.email|add_class:"form-input" }}
+                {{ form.email.errors }}
+            </div>
+
+            <!-- Поле password1 -->
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+                <div class="password-input">
+                    {{ form.password1|add_class:"form-input" }}
+                    <button type="button" class="toggle-password" data-target="{{ form.password1.id_for_label }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             id="eye-icon-{{ form.password1.id_for_label }}">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="password-error" style="display: none;"></div>
+                {{ form.password1.errors }}
+            </div>
+
+            <!-- Поле password2 -->
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                <div class="password-input">
+                    {{ form.password2|add_class:"form-input" }}
+                    <button type="button" class="toggle-password" data-target="{{ form.password2.id_for_label }}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             id="eye-icon-{{ form.password2.id_for_label }}">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="password2-error" style="display: none;"></div>
+                {{ form.password2.errors }}
+            </div>
+
+            <button type="submit" class="auth-btn">Зарегистрироваться</button>
+
+            <div class="auth-links">
+                <span>Уже есть аккаунт?</span>
+                <a href="{% url 'login' %}" class="auth-link">Войти</a>
+            </div>
+        </form>
     </div>
-</div>
+</main>
 
-<style>
-    .background {
-        background-image: url("{% static 'users/css/2d1fc8973773f831b83e6378e4049d75.jpg' %}");
-        background-size: cover;
-        background-position: center;
-        filter: blur(5px);
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-    }
 
-    .container {
-        position: relative;
-        z-index: 1;
-    }
+    <!-- Подключаем CSS -->
+    <link rel="stylesheet" href="{% static 'users/css/registration.css' %}">
 
-    .toggle-password {
-        border-color: #0d6efd;
-        transition: background-color 0.3s, border-color 0.3s;
-    }
-
-    .toggle-password:hover {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-
-    .toggle-password i {
-        color: #0d6efd;
-        transition: color 0.3s;
-    }
-
-    .toggle-password:hover i {
-        color: white;
-    }
-
-    /* Стили для валидации */
-    .is-invalid {
-        border-color: #dc3545 !important;
-    }
-
-    .is-valid {
-        border-color: #28a745 !important;
-    }
-
-    .invalid-feedback {
-        display: none;
-        color: #dc3545;
-        font-size: 0.875em;
-        margin-top: 0.25rem;
-    }
-
-    /* Стиль для кнопки при неактивной форме */
-    .btn-disabled {
-        opacity: 0.65;
-        cursor: not-allowed;
-    }
-</style>
-
-<!-- Подключение Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<script>
-    // Функция для переключения видимости пароля
-    function togglePasswordVisibility(fieldId) {
-        const passwordField = document.getElementById(fieldId);
-        if (passwordField.type === "password") {
-            passwordField.type = "text";
-        } else {
-            passwordField.type = "password";
-        }
-    }
-
-    // Проверка доступности логина
-    function checkUsernameAvailability() {
-        const usernameField = document.getElementById('{{ form.username.id_for_label }}');
-        const username = usernameField.value.trim();
-        const usernameError = document.getElementById('username-error');
-
-        if (username.length < 3) {
-            usernameField.classList.add('is-invalid');
-            usernameError.textContent = 'Логин должен содержать минимум 3 символа';
-            usernameError.style.display = 'block';
-            return false;
-        }
-
-        fetch('/check_username/?username=' + encodeURIComponent(username))
-            .then(response => response.json())
-            .then(data => {
-                if (data.exists) {
-                    usernameField.classList.add('is-invalid');
-                    usernameError.textContent = 'Этот логин уже занят';
-                    usernameError.style.display = 'block';
-                } else {
-                    usernameField.classList.remove('is-invalid');
-                    usernameField.classList.add('is-valid');
-                    usernameError.style.display = 'none';
-                }
-            });
-
-        return true;
-    }
-
-    // Проверка email
-    function checkEmailAvailability() {
-        const emailField = document.getElementById('{{ form.email.id_for_label }}');
-        const email = emailField.value.trim();
-        const emailError = document.getElementById('email-error');
-
-        if (!email) {
-            emailField.classList.remove('is-invalid');
-            emailField.classList.remove('is-valid');
-            emailError.style.display = 'none';
-            return false;
-        }
-
-        // Проверка формата email
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            emailField.classList.add('is-invalid');
-            emailError.textContent = 'Введите корректный email';
-            emailError.style.display = 'block';
-            return false;
-        }
-
-        fetch('/check_email/?email=' + encodeURIComponent(email))
-            .then(response => response.json())
-            .then(data => {
-                if (data.exists) {
-                    emailField.classList.add('is-invalid');
-                    emailError.textContent = 'Этот email уже используется';
-                    emailError.style.display = 'block';
-                } else {
-                    emailField.classList.remove('is-invalid');
-                    emailField.classList.add('is-valid');
-                    emailError.style.display = 'none';
-                }
-            });
-
-        return true;
-    }
-
-    // Проверка сложности пароля
-    function checkPasswordStrength() {
-        const passwordField = document.getElementById('{{ form.password1.id_for_label }}');
-        const password = passwordField.value;
-        const passwordError = document.getElementById('password-error');
-
-        if (password.length < 8) {
-            passwordField.classList.add('is-invalid');
-            passwordError.textContent = 'Пароль должен содержать минимум 8 символов';
-            passwordError.style.display = 'block';
-            return false;
-        }
-
-        if (!/[A-Z]/.test(password)) {
-            passwordField.classList.add('is-invalid');
-            passwordError.textContent = 'Пароль должен содержать хотя бы одну заглавную букву';
-            passwordError.style.display = 'block';
-            return false;
-        }
-
-        if (!/[0-9]/.test(password)) {
-            passwordField.classList.add('is-invalid');
-            passwordError.textContent = 'Пароль должен содержать хотя бы одну цифру';
-            passwordError.style.display = 'block';
-            return false;
-        }
-
-        passwordField.classList.remove('is-invalid');
-        passwordField.classList.add('is-valid');
-        passwordError.style.display = 'none';
-        return true;
-    }
-
-    // Проверка совпадения паролей
-    function checkPasswordMatch() {
-        const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
-        const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
-        const password2Error = document.getElementById('password2-error');
-
-        if (password1 !== password2Field.value) {
-            password2Field.classList.add('is-invalid');
-            password2Error.textContent = 'Пароли не совпадают';
-            password2Error.style.display = 'block';
-            return false;
-        }
-
-        password2Field.classList.remove('is-invalid');
-        password2Field.classList.add('is-valid');
-        password2Error.style.display = 'none';
-        return true;
-    }
-
-    // Общая проверка формы
-    function validateForm() {
-        const isUsernameValid = checkUsernameAvailability();
-        const isEmailValid = checkEmailAvailability();
-        const isPasswordValid = checkPasswordStrength();
-        const isPasswordMatch = checkPasswordMatch();
-
-        return isUsernameValid && isEmailValid && isPasswordValid && isPasswordMatch;
-    }
-
-    // Инициализация обработчиков событий
-    document.addEventListener('DOMContentLoaded', function() {
-        const usernameField = document.getElementById('{{ form.username.id_for_label }}');
-        const emailField = document.getElementById('{{ form.email.id_for_label }}');
-        const password1Field = document.getElementById('{{ form.password1.id_for_label }}');
-        const password2Field = document.getElementById('{{ form.password2.id_for_label }}');
-        const form = document.getElementById('registration-form');
-        const submitBtn = form.querySelector('button[type="submit"]');
-
-        // Обработчики событий
-        usernameField.addEventListener('blur', checkUsernameAvailability);
-        emailField.addEventListener('blur', checkEmailAvailability);
-        password1Field.addEventListener('input', function() {
-            checkPasswordStrength();
-            checkPasswordMatch(); // Проверяем совпадение при изменении первого пароля
-        });
-        password2Field.addEventListener('input', checkPasswordMatch);
-
-        // Проверка всех полей при изменении любого из них
-        [usernameField, emailField, password1Field, password2Field].forEach(field => {
-            field.addEventListener('input', function() {
-                const isValid = validateForm();
-                submitBtn.disabled = !isValid;
-                submitBtn.classList.toggle('btn-disabled', !isValid);
-            });
-        });
-
-        // Валидация перед отправкой
-        form.addEventListener('submit', function(e) {
-            if (!validateForm()) {
-                e.preventDefault();
-            }
-        });
-
-        // Первоначальная проверка
-        validateForm();
-    });
-</script>
+    <!-- Подключаем JS -->
+    <script>
+        // Передаем Django-переменные в JS
+        window.formIds = {
+            username: '{{ form.username.id_for_label }}',
+            email: '{{ form.email.id_for_label }}',
+            password1: '{{ form.password1.id_for_label }}',
+            password2: '{{ form.password2.id_for_label }}',
+            csrfToken: '{{ csrf_token }}'
+        };
+    </script>
+    <script src="{% static 'users/js/registration.js' %}" defer></script>
 {% endblock %}

@@ -1,32 +1,70 @@
-{% extends 'users/base.html' %}
+{% extends 'main/layout.html' %}
+
+{% block title %}Подтверждение email{% endblock %}
+
+{% load static %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header text-center">
-                    <h4>Подтверждение email</h4>
+<div class="background"></div>
+<button id="theme-toggle" class="theme-toggle" aria-label="Переключить тему">
+    <svg class="sun-moon" width="24" height="24" viewBox="0 0 24 24">
+        <circle class="sun" cx="12" cy="12" r="6" fill="currentColor"/>
+        <path class="moon" d="M12 3a6 6 0 0 0 0 12 6 6 0 1 1 0-12Z" fill="currentColor"/>
+    </svg>
+</button>
+
+<main class="main-content">
+    <div class="glass-container auth-container">
+        <h1 class="auth-title">Подтверждение email</h1>
+
+        <p class="text-center mb-4">Мы отправили код подтверждения на <strong>{{ email }}</strong></p>
+        <p class="text-center text-muted small mb-4" id="timer">
+            Код действителен еще: {{ minutes }}:{{ seconds }}
+        </p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
                 </div>
-                <div class="card-body">
-                    <p>На адрес <strong>{{ email }}</strong> был отправлен код подтверждения.</p>
-                    <p>Пожалуйста, введите его в поле ниже:</p>
-                    
-                    {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endif %}
-                    
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Код подтверждения</label>
-                            <input type="text" class="form-control" id="code" name="code" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Подтвердить</button>
-                    </form>
-                </div>
+            {% endif %}
+
+            <!-- Поле для кода -->
+            <div class="form-group">
+                {{ form.code.label_tag }}
+                {{ form.code }}
+                {% if form.code.errors %}
+                    <div class="invalid-feedback" style="display: block;">
+                        {{ form.code.errors.0 }}
+                    </div>
+                {% endif %}
             </div>
-        </div>
+
+            <!-- Капча -->
+            <div class="form-group">
+                {{ form.captcha.label_tag }}
+                {{ form.captcha }}
+                {% if form.captcha.errors %}
+                    <div class="invalid-feedback" style="display: block;">
+                        {{ form.captcha.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="auth-btn">Подтвердить</button>
+        </form>
     </div>
-</div>
+</main>
+
+<!-- Подключаем CSS -->
+<link rel="stylesheet" href="{% static 'users/css/verifly_email.css' %}">
+
+<!-- Подключаем JS -->
+<script>
+    // Передаем данные из Django в JS
+    const initialSeconds = {{ remaining_seconds }};
+</script>
+<script src="{% static 'users/js/verifly_email.js' %}"></script>
 {% endblock %}

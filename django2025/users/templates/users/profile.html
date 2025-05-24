@@ -1,8 +1,6 @@
 {% extends 'main/layout.html' %}
 {% load static %}
-
 {% block title %}HHabits - Профиль{% endblock %}
-
 {% block content %}
     <!-- Анимированный фон -->
     <div class="background"></div>
@@ -18,32 +16,117 @@
         <div class="glass-container profile-container">
             <h1 class="profile-title">Профиль: {{ profile.user.username }}</h1>
 
-            <!-- Аватар -->
-            <div class="avatar-container">
-                {% if profile.avatar %}
-                    <img src="{{ profile.avatar.url }}" alt="Аватар" class="avatar-image">
-                {% else %}
-                    <div class="avatar-placeholder">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+
+            <!-- Блок аватарки и информации -->
+            <div class="profile-header">
+                <div class="avatar-block">
+                    <div class="avatar-wrapper">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" alt="Аватар" class="avatar-image" id="avatar-preview">
+                        {% else %}
+                            <div class="avatar-placeholder" id="avatar-preview">
+                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
+
+                    <!-- Кнопка "Изменить настройки профиля" -->
+                <div class="profile-actions">
+                    <button class="edit-profile-btn" id="open-settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Изменить настройки профиля
+                    </button>
+                </div>
+
+                <div class="profile-info">
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">{{ profile.user.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Дата регистрации:</span>
+                        <span class="info-value">{{ profile.user.date_joined|date:"d.m.Y" }}</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Информация профиля -->
-            <div class="profile-info">
-                <div class="info-item">
-                    <span class="info-label">Email:</span>
-                    <span class="info-value">{{ profile.user.email }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Дата регистрации:</span>
-                    <span class="info-value">{{ profile.user.date_joined|date:"d.m.Y" }}</span>
+            <!-- Модальное окно настроек -->
+            <div class="settings-modal" id="settings-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Настройки профиля</h3>
+                        <button class="close-modal" id="close-settings">&times;</button>
+                    </div>
+
+                    <!-- Форма для аватара -->
+                    <form id="avatar-form" method="post" enctype="multipart/form-data" action="{% url 'update_avatar' %}">
+                        {% csrf_token %}
+                        <div class="form-section">
+                            <h4>Аватар</h4>
+                            <div class="avatar-upload">
+                                <label for="avatar-upload" class="upload-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24">
+                                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+                                        <polyline points="16 5 22 5 22 11"></polyline>
+                                        <polyline points="21 15 15 21 9 15 3 21"></polyline>
+                                    </svg>
+                                    <span>Выберите файл</span>
+                                    <input type="file" id="avatar-upload" name="avatar" accept="image/*">
+                                </label>
+                                <span class="file-name" id="file-name">Файл не выбран</span>
+                            </div>
+                            <p class="form-note">Максимальный размер: 2MB. Допустимые форматы: JPG, PNG.</p>
+                        </div>
+                    </form>
+
+                    <!-- Форма для пароля -->
+                    <form id="password-form" method="post" action="{% url 'update_password' %}">
+                        {% csrf_token %}
+                        <div class="form-section">
+                            <h4>Смена пароля</h4>
+                            <div class="form-group">
+                                <input type="password" name="old_password" placeholder="Текущий пароль" required minlength="8">
+                                <div class="invalid-feedback" id="old-password-error" style="display: none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="new_password1" placeholder="Новый пароль (мин. 8 символов)" required minlength="8">
+                                <div class="invalid-feedback" id="new-password-error" style="display: none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="new_password2" placeholder="Повторите новый пароль" required minlength="8">
+                                <div class="invalid-feedback" id="password2-error" style="display: none;"></div>
+                            </div>
+                            <p class="form-note">Пароль должен содержать минимум 8 символов, одну заглавную букву и цифру.</p>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="cancel-btn" id="cancel-settings">Отмена</button>
+                            <button type="submit" class="save-btn">Изменить пароль</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
+            <!-- Достижения -->
+            <div class="achievements-section">
+                <h2 class="achievements-title">Достижения</h2>
+                <div class="achievements-grid">
+                    {% for achievement in achievements %}
+                        <div class="achievement-card{% if achievement.unlocked_at %} unlocked{% endif %}">
+                            <img src="{% static achievement.icon %}" alt="{{ achievement.name }}">
+                            <h3>{{ achievement.name }}</h3>
+                            <p>{{ achievement.description }}</p>
+                        </div>
+                    {% empty %}
+                        <p>Нет достижений</p>
+                    {% endfor %}
+                </div>
+            </div>
             <!-- Привычки пользователя -->
             <div class="habits-section">
                 <h2 class="habits-title">Ваши привычки</h2>
@@ -54,28 +137,17 @@
                                 <div class="habit-header">
                                     <h3 class="habit-name">{{ user_habit.habit.name }}</h3>
                                     <div class="habit-actions">
-                                        <a href="{% url 'habit_stats' user_habit.id %}" class="stats-btn">
+                                        <a href="{% url 'habit_stats' user_habit.id %}" class="stats-btn" title="Статистика">
                                             <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
                                         </a>
-                                        <a href="{% url 'habit_settings' user_habit.id %}" class="settings-btn">
-                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                        <a href="{% url 'habit_settings' user_habit.id %}" class="settings-btn" title="Настройки">
+                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 1 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1-1.51A1.65 1.65 0 0 0 3 9V3a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0z"/></svg>
                                         </a>
+                                        <button class="delete-btn" title="Удалить" data-habit-id="{{ user_habit.id }}">
+                                            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="habit-days">
-                                    {% if user_habit.habit.is_fixed %}
-                                        <span class="day-badge">Каждый день</span>
-                                    {% else %}
-                                        {% if user_habit.monday %}<span class="day-badge">Пн</span>{% endif %}
-                                        {% if user_habit.tuesday %}<span class="day-badge">Вт</span>{% endif %}
-                                        {% if user_habit.wednesday %}<span class="day-badge">Ср</span>{% endif %}
-                                        {% if user_habit.thursday %}<span class="day-badge">Чт</span>{% endif %}
-                                        {% if user_habit.friday %}<span class="day-badge">Пт</span>{% endif %}
-                                        {% if user_habit.saturday %}<span class="day-badge">Сб</span>{% endif %}
-                                        {% if user_habit.sunday %}<span class="day-badge">Вс</span>{% endif %}
-                                    {% endif %}
-                                </div>
-                                <p class="habit-date">Добавлено: {{ user_habit.created_at|date:"d.m.Y" }}</p>
                             </div>
                         {% endfor %}
                     </div>
@@ -84,25 +156,28 @@
                 {% endif %}
             </div>
 
-            <!-- Кнопки действий -->
+            <!-- Навигация -->
             <div class="profile-actions">
-            <a href="{% url 'track_habits' %}" class="action-btn primary-btn">
-                <span>Отслеживать привычки</span>
-            </a>
-            <a href="{% url 'index' %}" class="action-btn secondary-btn">
-                <span>На главную</span>
-            </a>
-            <a href="{% url 'logout' %}" class="action-btn secondary-btn">
-                <span>Выйти</span>
-            </a>
+                <a href="{% url 'track_habits' %}" class="action-btn primary-btn">Отслеживать привычки</a>
+                <a href="{% url 'index' %}" class="action-btn secondary-btn">На главную</a>
+                <a href="{% url 'logout' %}" class="action-btn secondary-btn">Выйти</a>
             </div>
         </div>
     </main>
 
     <!-- Подключаем CSS -->
     <link rel="stylesheet" href="{% static 'users/css/profile2.css' %}">
-
     <!-- Подключаем JS -->
     <script src="{% static 'users/js/profile.js' %}"></script>
 
+    <!-- Сообщения Django -->
+    {% if messages %}
+        {% for message in messages %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    showMessage("{{ message }}", "{{ message.tags }}");
+                });
+            </script>
+        {% endfor %}
+    {% endif %}
 {% endblock %}

@@ -15,7 +15,16 @@
     <main class="main-content">
         <div class="glass-container">
             <div class="tracker-header">
+
                 <h1 class="tracking-title">Трекер привычек</h1>
+                <div class="info-note">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12" y2="8"></line>
+                    </svg>
+                    <span>Вы можете отмечать привычки за последние 7 дней</span>
+                </div>
                 <div class="date-navigation">
                     <button class="nav-btn" id="prev-day">
                         <svg width="24" height="24" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
@@ -29,7 +38,6 @@
                     </button>
                 </div>
             </div>
-
             <!-- Основной список привычек -->
             <div class="habits-container">
                 {% if habits %}
@@ -95,6 +103,17 @@
                         </div>
                     {% endfor %}
                 </div>
+
+            </div>
+                 <!-- Навигация назад -->
+            <div class="back-link" style="display: flex; justify-content: center; gap: 1rem;">
+                <a href="{% url 'profile' %}" class="back-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Назад в профиль
+                </a>
             </div>
         </div>
     </main>
@@ -156,7 +175,6 @@
                 window.location.href = url.toString();
             }
 
-            // Полная функция updateHabitCompletion
             function updateHabitCompletion(habitId, date, completed, element) {
                 // Получаем текущую дату с учетом часового пояса
                 const now = new Date();
@@ -167,8 +185,8 @@
                 // Создаем объекты Date для сравнения
                 const today = new Date(todayStr + 'T00:00:00');
                 const selectedDate = new Date(date + 'T00:00:00');
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
+                const lastAllowedDate = new Date(today);
+                lastAllowedDate.setDate(lastAllowedDate.getDate() - 6); // 7 дней включая сегодня
 
                 // Проверяем допустимость даты
                 if (selectedDate > today) {
@@ -177,8 +195,8 @@
                     return;
                 }
 
-                if (selectedDate < yesterday) {
-                    alert('Можно отмечать привычки только за сегодня или вчера');
+                if (selectedDate < lastAllowedDate) {
+                    alert('Можно отмечать привычки только за последние 7 дней (включая сегодня)');
                     element.querySelector('input').checked = !completed;
                     return;
                 }

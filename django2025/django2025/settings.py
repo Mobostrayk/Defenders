@@ -26,11 +26,30 @@ SECRET_KEY = 'django-insecure-px8dib5k2vqa^-7###8xxh95rnczv(#=wrmqcpg@4&j3gw3i!^
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 # Application definition
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 INSTALLED_APPS = [
+    'captcha',
     'main',
     'users',
     'django.contrib.admin',
@@ -40,6 +59,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+# Для тестирования (письма будут выводиться в консоль)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+CAPTCHA_FONT_SIZE = 42
+CAPTCHA_LENGTH = 6
+CAPTCHA_TIMEOUT = 5
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
